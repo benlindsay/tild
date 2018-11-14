@@ -1,0 +1,25 @@
+dim: 2
+
+Lx: [5, 6]
+Nx: [10, 10]
+sim_plan: single_sim
+sim_type: canonical
+output_dir: output
+max_iter: 100
+
+components:
+  - type: homopolymer
+    species: A
+    phi: 0.4
+    N: 20
+  - type: homopolymer
+    species: B
+    phi: 0.6
+    N: 40
+
+outputs:
+  summary:
+    var_list: ["iter", "u_bond"]
+    print_freq: 10
+    column_width: 15
+    write_header: true

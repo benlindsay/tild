@@ -1,0 +1,22 @@
+bin/
+build/
+html/
+include/yaml-cpp/
+include/boost/
+output/
+lib/
+tmp/
+tools/clang-format
+*.o
+
+# Ignore simulation outputs
+/*.dat
+
+# Ignore Mac specific files
+.DS_Store
+
+# Ignore vim ctags file
+.tags
+
+# Ignore VSCode stuff
+.vscode/
