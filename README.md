@@ -2,4 +2,4 @@
 
 # DRiFT
 
-## Dynamic Riggleman Field Theory
+## **D**ynamic **Ri**ggleman **F**ield **T**heory
