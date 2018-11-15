@@ -11,12 +11,6 @@ Canonical_Sim::Canonical_Sim(YAML::Node input) : Sim(input) {
   init_output_list(input);
 }
 
-Canonical_Sim::~Canonical_Sim() {
-  for (size_t i = 0; i < output_list.size(); i++) {
-    delete output_list[i];
-  }
-}
-
 std::string Canonical_Sim::get_var_as_string(std::string var_name,
                                              int str_len) {
   std::string var_name_lower = utils::to_lower(var_name);
@@ -70,15 +64,15 @@ void Canonical_Sim::init_output_list(YAML::Node input) {
 }
 
 void Canonical_Sim::calculate_grid_densities() {
-  utils::print_one_line("Calculating grid densities");
+  // utils::print_one_line("Calculating grid densities");
 }
 
 void Canonical_Sim::calculate_forces() {
-  utils::print_one_line("Calculating forces");
+  // utils::print_one_line("Calculating forces");
 }
 
 void Canonical_Sim::move_particles() {
-  utils::print_one_line("Moving particles");
+  // utils::print_one_line("Moving particles");
 }
 
 // Private Functions

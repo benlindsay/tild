@@ -8,7 +8,6 @@
 #include <boost/filesystem/fstream.hpp>  // fs::ofstream
 #include <iomanip>                       // std::setw, std::setprecision
 #include <iostream>                      // std::cout, std::endl
-#include "sim.hpp"
 #include "utils.hpp"
 
 class Sim;
@@ -25,5 +24,7 @@ class Output {
 
   Sim *sim;
 };
+
+#include "sim.hpp"
 
 #endif  // OUTPUT_HPP

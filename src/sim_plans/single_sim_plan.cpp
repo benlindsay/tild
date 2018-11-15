@@ -10,6 +10,6 @@ Single_Sim_Plan::Single_Sim_Plan(YAML::Node input) : Sim_Plan(input) {
 }
 
 void Single_Sim_Plan::run() {
-  utils::print_one_line("Running Single_Sim_Pan");
+  utils::print_one_line("Running Single_Sim_Plan");
   sim->run();
 }

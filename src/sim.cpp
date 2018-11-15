@@ -31,7 +31,14 @@ Sim::Sim(YAML::Node input) {
   // Initialize forces
 }
 
-Sim::~Sim() {}
+Sim::~Sim() {
+  for (int i = 0; i < output_list.size(); i++) {
+    delete output_list[i];
+  }
+  for (int i = 0; i < component_list.size(); i++) {
+    delete component_list[i];
+  }
+}
 
 void Sim::init_box_vars(YAML::Node input) {
   // Initialize Lx, Nx, and dx
