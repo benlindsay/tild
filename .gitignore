@@ -5,6 +5,7 @@ include/yaml-cpp/
 include/boost/
 output/
 lib/
+scratch/
 tmp/
 tools/clang-format
 *.o
