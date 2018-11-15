@@ -11,7 +11,7 @@ TARGET := bin/drift
 SRCDIR := src
 BUILDDIR := build
 SRCEXT := cpp
-SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
+SOURCES := $(shell find $(SRCDIR) -type f -name '*.$(SRCEXT)')
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 
 # yaml-cpp install variables
@@ -26,6 +26,7 @@ TEST_SRC += $(filter-out src/main.cpp, $(SOURCES))
 
 $(TARGET): $(YAML_FILES) $(BOOST_FILES) $(OBJECTS)
 	@echo " Linking..."
+	@echo $(SRCDIR)
 	@mkdir -p $(dir $@)
 	$(CC) $(OBJECTS) -o $(TARGET) $(LIB)
 
@@ -59,7 +60,7 @@ tools/clang-format:
 
 # Test stuff
 test/test_main.o: test/test_main.cpp test/catch.hpp
-	$(CC) $(CFLAGS) $< -c -o $@
+	$(CC) $(CFLAGS) $< -c $(INC) -o $@
 
 bin/test: $(YAML_FILES) $(BOOST_FILES) $(TEST_SRC)
 	@mkdir -p $(dir $@)
