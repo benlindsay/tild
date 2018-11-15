@@ -5,7 +5,7 @@ Nx: [10, 10]
 sim_plan: single_sim
 sim_type: canonical
 output_dir: output
-max_iter: 100
+max_iter: 10
 
 components:
   - type: homopolymer
@@ -20,6 +20,6 @@ components:
 outputs:
   summary:
     var_list: ["iter", "u_bond"]
-    print_freq: 10
+    print_freq: 2
     column_width: 15
     write_header: true
