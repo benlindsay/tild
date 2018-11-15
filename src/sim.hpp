@@ -45,6 +45,7 @@ class Sim {
   int dim;
   int iter;
   int max_iter;
+  double rho_0;
 
   // Grid/box variables
   ArrayXd Lx;
