@@ -23,3 +23,5 @@ outputs:
     print_freq: 2
     column_width: 15
     write_header: true
+  lammpstrj:
+    print_freq: 5
