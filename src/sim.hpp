@@ -11,6 +11,7 @@
 #include "yaml-cpp/yaml.h"
 
 #include "component.hpp"
+#include "globals.hpp"
 #include "output.hpp"
 #include "output_factory.hpp"
 #include "utils.hpp"
@@ -44,6 +45,7 @@ class Sim {
   int dim;
   int iter;
   int max_iter;
+  double rho_0;
 
   // Grid/box variables
   ArrayXd Lx;
