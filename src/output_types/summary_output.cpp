@@ -47,7 +47,7 @@ Summary_Output::~Summary_Output(void) { file.close(); }
 const std::string Summary_Output::default_file_name = "summary.dat";
 
 bool Summary_Output::is_time_to_write(void) {
-  if (sim->iter % print_freq == 0) {
+  if (sim->iter % print_freq == 0 || sim->iter == sim->max_iter) {
     return true;
   } else {
     return false;
