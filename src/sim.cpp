@@ -93,6 +93,7 @@ void Sim::init_box_vars(YAML::Node input) {
   // Assign V and M
   V = Lx.prod();
   M = Nx.prod();
+  ML = M;
 }
 
 void Sim::init_component_list(YAML::Node input) {
