@@ -119,6 +119,7 @@ void Sim::write_outputs() {
 
 void Sim::run() {
   utils::print_one_line("Running " + description);
+  write_iter_0_outputs();
   for (iter = 1; iter <= max_iter; iter++) {
     calculate_grid_densities();
     calculate_forces();
