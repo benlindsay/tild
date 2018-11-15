@@ -1,4 +1,4 @@
-// test-init.hpp
+// test_init.hpp
 //
 // Copyright (c) 2017 Ben Lindsay <benjlindsay@gmail.com>
 
