@@ -9,9 +9,11 @@
 
 class Homopolymer : public Component {
  public:
-  Homopolymer(Sim *sim, int n_segments, Component::Species_Type species);
+  Homopolymer(Sim *sim, int n_segments_per_molecule,
+              Component::Species_Type species);
   virtual ~Homopolymer(){};
-  int n_segments;
+  Component::Species_Type species;
+  int n_segments_per_molecule;
 };
 
 #endif  // HOMOPOLYMER_HPP

@@ -24,6 +24,11 @@ Sim::Sim(YAML::Node input) {
 
   // Initialize box/grid variables
   init_box_vars(input);
+
+  // Initialize components
+  init_component_list(input);
+
+  // Initialize forces
 }
 
 Sim::~Sim() {}
@@ -98,8 +103,8 @@ void Sim::init_box_vars(YAML::Node input) {
 
 void Sim::init_component_list(YAML::Node input) {
   utils::print_one_line("Running Sim::init_component_list()");
-  // Component::Species_Type species = Component::Species_Type::A;
-  // component_list.push_back(new FT_Homopolymer(this, 40, species));
+  Component::Species_Type species = Component::Species_Type::A;
+  component_list.push_back(new Homopolymer(this, 40, species));
 }
 
 void Sim::write_iter_0_outputs() {
