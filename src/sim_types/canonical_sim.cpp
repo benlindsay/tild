@@ -71,15 +71,15 @@ void Canonical_Sim::init_output_list(YAML::Node input) {
 }
 
 void Canonical_Sim::calculate_grid_densities() {
-  utils::print_one_line("Calculating grid densities");
+  // utils::print_one_line("Calculating grid densities");
 }
 
 void Canonical_Sim::calculate_forces() {
-  utils::print_one_line("Calculating forces");
+  // utils::print_one_line("Calculating forces");
 }
 
 void Canonical_Sim::move_particles() {
-  utils::print_one_line("Moving particles");
+  // utils::print_one_line("Moving particles");
 }
 
 // Private Functions
