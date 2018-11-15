@@ -12,12 +12,6 @@ Canonical_Sim::Canonical_Sim(YAML::Node input) : Sim(input) {
   write_iter_0_outputs();
 }
 
-Canonical_Sim::~Canonical_Sim() {
-  for (size_t i = 0; i < output_list.size(); i++) {
-    delete output_list[i];
-  }
-}
-
 std::string Canonical_Sim::get_var_as_string(std::string var_name,
                                              int str_len) {
   std::string var_name_lower = utils::to_lower(var_name);
