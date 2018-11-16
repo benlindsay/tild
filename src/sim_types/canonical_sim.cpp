@@ -7,7 +7,6 @@
 Canonical_Sim::Canonical_Sim(YAML::Node input) : Sim(input) {
   utils::print_one_line("Initializing Canonical_Sim");
   init_default_summary_var_list();
-  init_component_list(input);
   init_output_list(input);
 }
 
