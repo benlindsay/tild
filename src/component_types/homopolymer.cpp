@@ -1,4 +1,4 @@
-// ft_homopolymer.cpp
+// homopolymer.cpp
 //
 // Copyright (c) 2018 Ben Lindsay <benjlindsay@gmail.com>
 
