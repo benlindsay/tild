@@ -9,7 +9,7 @@ Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
     : Component(sim, vol_frac),
       species(species),
       n_segments_per_molecule(n_segments_per_molecule) {
-  name = std::string("homopolyer_") + Component::get_species_name(species);
+  name = std::string("homopolyer_") + Component::species_enum_to_char(species);
   utils::print_one_line("Initializing Component " + name);
 
   n_molecules =
