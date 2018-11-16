@@ -118,7 +118,7 @@ void Sim::init_box_vars(YAML::Node input) {
 void Sim::init_component_list(YAML::Node input) {
   utils::print_one_line("Running Sim::init_component_list()");
   Component::Species_Type species = Component::Species_Type::A;
-  component_list.push_back(new Homopolymer(this, 40, species));
+  component_list.push_back(new Homopolymer(this, 1.0, 40, species));
 }
 
 void Sim::write_iter_0_outputs() {

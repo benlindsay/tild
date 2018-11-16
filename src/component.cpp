@@ -4,7 +4,7 @@
 
 #include "component.hpp"
 
-Component::Component(Sim *sim) : sim(sim) {
+Component::Component(Sim *sim, double vol_frac) : sim(sim), vol_frac(vol_frac) {
   int M = sim->M;
   rho_center = ArrayXd::Zero(M);
   rho_center_hat = ArrayXd::Zero(M);

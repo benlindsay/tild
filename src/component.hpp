@@ -15,13 +15,14 @@ using Eigen::ArrayXXd;  // Dynamically sized 2D double Array
 
 class Component {
  public:
-  Component(Sim *sim);
+  Component(Sim *sim, double vol_frac);
   virtual ~Component(){};
   enum Species_Type { A, B, C, D, E, F, G };
   static char get_species_name(Species_Type s) {
     const char Species_Char[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
     return Species_Char[s];
   };
+  Sim *sim;
   std::string name;  // Name of component
   double vol_frac;   // Total volume fraction
   int n_molecules;   // Total number of molecules of this type in system

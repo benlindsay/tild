@@ -4,9 +4,9 @@
 
 #include "homopolymer.hpp"
 
-Homopolymer::Homopolymer(Sim *sim, int n_segments_per_molecule,
+Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
                          Component::Species_Type species)
-    : Component(sim),
+    : Component(sim, vol_frac),
       species(species),
       n_segments_per_molecule(n_segments_per_molecule) {
   name = std::string("homopolyer_") + Component::get_species_name(species);
