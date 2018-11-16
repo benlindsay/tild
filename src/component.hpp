@@ -7,6 +7,7 @@
 
 #include "Eigen/Dense"
 #include "globals.hpp"
+#include "utils.hpp"
 
 class Sim;
 
@@ -19,9 +20,16 @@ class Component {
   Component(Sim *sim, double vol_frac);
   virtual ~Component(){};
   enum Species_Type { A, B, C, D, E, F, G };
-  static char get_species_name(Species_Type s) {
-    const char Species_Char[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+  static char species_enum_to_char(Species_Type s) {
+    const char Species_Char[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g'};
     return Species_Char[s];
+  };
+  static Species_Type species_char_to_enum(char c) {
+    if (int(c) < int('a') || int(c) > int('g')) {
+      utils::die(std::string(1, c) + " is not a recognized Species_Type");
+    }
+    Species_Type species = static_cast<Species_Type>(int(c) - int('a'));
+    return species;
   };
   Sim *sim;
   std::string name;  // Name of component
