@@ -44,7 +44,35 @@ void Lammpstrj_Output::write_iter_0() {
 }
 
 void Lammpstrj_Output::write() {
-  std::stringstream ss;
-  ss << "iter " << sim->iter;
-  utils::print_one_line(file, ss);
+  int n_sites_total = 0;
+  for (int i = 0; i < component_list.size(); i++) {
+    n_sites_total += component_list[i]->n_sites;
+  }
+
+  if (RANK == 0) {
+    file << "ITEM: TIMESTEP\n";
+    file << sim->iter << "\n";
+    file << "ITEM: NUMBER OF ATOMS\n";
+    file << n_sites_total << "\n";
+    file << "ITEM: BOX BOUNDS\n";
+    for (int d = 0; d < sim->dim; d++) {
+      file << 0.0 << " " << sim->Lx[d] << "\n";
+    }
+    file << "ITEM: ATOMS id type mol x y";
+    if (sim->dim == 3) file << " z";
+    file << "\n";
+    int site_id_shift = 0;
+    int mol_id_shift = 0;
+    for (int i_comp = 0; i_comp < component_list.size(); i_comp++) {
+      Component *comp = component_list[i_comp];
+      for (int i_site = 0; i_site < comp->n_sites; i_site++) {
+        file << i_site + site_id_shift << " ";
+        file << comp->site_types[i_site] << " ";
+        file << comp->molecule_ids[i_site] + mol_id_shift << " ";
+        file << comp->site_coords.row(i_site) << "\n";
+      }
+      site_id_shift += comp->n_sites;
+      mol_id_shift += comp->n_molecules;
+    }
+  }
 }
