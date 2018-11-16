@@ -11,6 +11,7 @@
 #include "yaml-cpp/yaml.h"
 
 #include "component.hpp"
+#include "component_factory.hpp"
 #include "globals.hpp"
 #include "output.hpp"
 #include "output_factory.hpp"

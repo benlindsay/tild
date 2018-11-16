@@ -117,8 +117,15 @@ void Sim::init_box_vars(YAML::Node input) {
 
 void Sim::init_component_list(YAML::Node input) {
   utils::print_one_line("Running Sim::init_component_list()");
-  Component::Species_Type species = Component::Species_Type::A;
-  component_list.push_back(new Homopolymer(this, 1.0, 40, species));
+  if (component_list.size() > 0) {
+    utils::die("component_list has already been filled!");
+  }
+  YAML::Node components = input["components"];
+  for (std::size_t i = 0; i < components.size(); i++) {
+    Component *comp =
+        Component_Factory::New_Component(this, input, components[i]);
+    component_list.push_back(comp);
+  }
 }
 
 void Sim::write_iter_0_outputs() {
