@@ -22,6 +22,13 @@ Sim::Sim(YAML::Node input) {
     max_iter = input["max_iter"].as<int>();
   }
 
+  // Initialize rho_0
+  if (!input["rho_0"]) {
+    utils::die("rho_0 not found in input file");
+  } else {
+    rho_0 = input["rho_0"].as<double>();
+  }
+
   // Initialize box/grid variables
   init_box_vars(input);
 

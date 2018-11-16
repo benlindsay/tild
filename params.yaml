@@ -2,6 +2,7 @@ dim: 2
 
 Lx: [5, 6]
 Nx: [10, 10]
+rho_0: 10.0
 sim_plan: single_sim
 sim_type: canonical
 output_dir: output
