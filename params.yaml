@@ -11,12 +11,12 @@ max_iter: 10
 components:
   - type: homopolymer
     species: A
-    phi: 0.4
-    N: 20
+    vol_frac: 0.4
+    n_segments_per_molecule: 10
   - type: homopolymer
     species: B
-    phi: 0.6
-    N: 40
+    vol_frac: 0.6
+    n_segments_per_molecule: 20
 
 outputs:
   summary:
