@@ -10,6 +10,7 @@
 
 class Sim;
 
+using Eigen::ArrayXi;   // Dynamically sized integer Array
 using Eigen::ArrayXd;   // Dynamically sized double Array
 using Eigen::ArrayXXd;  // Dynamically sized 2D double Array
 
@@ -29,12 +30,15 @@ class Component {
   int n_sites;       // Total number of sites (anything with its own set
                      // of coordinates) of this type in system
 
-  Sim *sim;
   ArrayXd rho_center;      // Center density distribution
   ArrayXd rho_center_hat;  // Fourier transform of center density
   ArrayXd rho;             // Smeared/total density distribution
   ArrayXd rho_hat;         // Fourier transform of total density
-  ArrayXXd site_coords;    // Coordinates of sites
+  ArrayXi site_types;    // Array of species type for each site
+  ArrayXi molecule_ids;  // Each component has ids from 0 to n_molecules so that
+                         // they don't have change if other components add or
+                         // subtract molecules
+  ArrayXXd site_coords;  // Coordinates of sites
 };
 
 #include "component_types/homopolymer.hpp"
