@@ -12,6 +12,9 @@ Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
   name = std::string("homopolyer_") + Component::species_enum_to_char(species);
   utils::print_one_line("Initializing Component " + name);
 
+  // Initialize center density array for specified species to array or zeros
+  rho_center[species] = ArrayXd::Zero(sim->ML);
+
   n_molecules =
       int(sim->rho_0 * sim->V * vol_frac / n_segments_per_molecule + 0.5);
   n_sites = n_molecules * n_segments_per_molecule;
