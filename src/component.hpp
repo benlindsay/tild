@@ -5,7 +5,7 @@
 #ifndef COMPONENT_HPP
 #define COMPONENT_HPP
 
-#include <unordered_map>
+#include <map>
 #include "Eigen/Dense"
 #include "globals.hpp"
 #include "utils.hpp"
@@ -40,14 +40,13 @@ class Component {
                      // of coordinates) of this type in system
 
   // Store the center density distributions for each species in the component in
-  // an unordered_map. For example, the B species center density array can be
-  // accessed in any of the following ways:
+  // a map data structure. For example, the B species center density array can
+  // be accessed in any of the following ways:
   //   ArrayXd rho_b = rho_center[1];
   //   ArrayXd rho_b = rho_center[Component::B];
   //   Species_Type b = Component::B; ArrayXd rho_b = rho_center[b]
-  // The hash<int> thing makes this work with an enum type.
-  // See https://stackoverflow.com/a/22361511/2680824
-  std::unordered_map<Species_Type, ArrayXd, std::hash<int> > rho_center;
+  std::map<Species_Type, ArrayXd> rho_center;
+
   ArrayXi site_types;    // Array of species type for each site
   ArrayXi molecule_ids;  // Each component has ids from 0 to n_molecules so that
                          // they don't have change if other components add or
