@@ -5,6 +5,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
+#include <Eigen/Dense>
 #include <algorithm>  // std::transform
 #include <fstream>    // std::ofstream
 #include <iostream>   // std::cout, std::endl
@@ -14,11 +15,17 @@
 
 #define MAX_PATH_LEN 256
 
+using Eigen::ArrayXXd;  // Dynamically sized 2D double Array
+using Eigen::ArrayXd;   // Dynamically sized 2D double Array
+
 namespace utils {
 
 void die();
 void die(std::string);
 void die(std::stringstream&);
+bool check_pbc(ArrayXXd& array, ArrayXd& Lx);
+void enforce_pbc(ArrayXXd& array, ArrayXd& Lx);
+void enforce_pbc(ArrayXXd& array, ArrayXd& Lx, int i_site);
 void mpi_init_wrapper(int, const char**);
 void mpi_finalize_wrapper();
 void print_one_line(std::string);
@@ -28,6 +35,7 @@ void print_one_line(std::ofstream&, std::string);
 void print_one_line(std::ofstream&, std::stringstream&);
 std::string to_lower(std::string);
 void to_lower(YAML::Node);
+
 }  // namespace utils
 
 #endif  // UTILS_HPP

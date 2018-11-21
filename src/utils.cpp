@@ -22,6 +22,55 @@ void utils::die(std::string message) {
 
 void utils::die(std::stringstream& message) { utils::die(message.str()); }
 
+bool utils::check_pbc(ArrayXXd& array, ArrayXd& Lx) {
+  size_t n_dim = Lx.size();
+  for (size_t i_dim = 0; i_dim < n_dim; i_dim++) {
+    double Lx_i = Lx[i_dim];
+    ArrayXd col = array.col(i_dim);
+    bool all_greater_than_0 = col.min(0).isApproxToConstant(0);
+    if (!all_greater_than_0) {
+      return false;
+    }
+    bool all_less_than_Lx = col.max(Lx_i).isApproxToConstant(Lx_i);
+    if (!all_less_than_Lx) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void utils::enforce_pbc(ArrayXXd& array, ArrayXd& Lx) {
+  size_t n_sites = array.rows();
+  size_t n_dim = Lx.size();
+  for (size_t i_dim = 0; i_dim < n_dim; i_dim++) {
+    double Lx_i = Lx[i_dim];
+    for (size_t i_site = 0; i_site < n_sites; i_site++) {
+      double value = array(i_site, i_dim);
+      if (value < 0.0) {
+        value += Lx_i;
+      } else if (value > Lx_i) {
+        value -= Lx_i;
+      }
+      array(i_site, i_dim) = value;
+    }
+  }
+}
+
+void utils::enforce_pbc(ArrayXXd& array, ArrayXd& Lx, int i_site) {
+  size_t n_sites = array.rows();
+  size_t n_dim = Lx.size();
+  for (size_t i_dim = 0; i_dim < n_dim; i_dim++) {
+    double Lx_i = Lx[i_dim];
+    double value = array(i_site, i_dim);
+    if (value < 0.0) {
+      value += Lx_i;
+    } else if (value > Lx_i) {
+      value -= Lx_i;
+    }
+    array(i_site, i_dim) = value;
+  }
+}
+
 void utils::mpi_init_wrapper(int argc, const char* argv[]) {
 #ifdef MPI
   MPI_Init(&argc, &argv);

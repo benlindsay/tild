@@ -28,6 +28,9 @@ Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
       int prev_site = cur_site - 1;
       site_coords.row(cur_site) =
           site_coords.row(prev_site) + ArrayXXd::Random(1, sim->dim);
+      utils::enforce_pbc(site_coords, sim->Lx, cur_site);
     }
   }
+  bool pbc_check = utils::check_pbc(site_coords, sim->Lx);
+  std::cout << "PBC Check: " << pbc_check << std::endl;
 }
