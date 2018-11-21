@@ -57,7 +57,6 @@ void utils::enforce_pbc(ArrayXXd& array, ArrayXd& Lx) {
 }
 
 void utils::enforce_pbc(ArrayXXd& array, ArrayXd& Lx, int i_site) {
-  size_t n_sites = array.rows();
   size_t n_dim = Lx.size();
   for (size_t i_dim = 0; i_dim < n_dim; i_dim++) {
     double Lx_i = Lx[i_dim];
