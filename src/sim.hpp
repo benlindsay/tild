@@ -52,6 +52,7 @@ class Sim {
   ArrayXd Lx;
   ArrayXi Nx;
   ArrayXd dx;
+  ArrayXXd local_grid_coords;
   double V;
   int M;
   int ML;

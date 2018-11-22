@@ -113,6 +113,19 @@ void Sim::init_box_vars(YAML::Node input) {
   V = Lx.prod();
   M = Nx.prod();
   ML = M;
+
+  local_grid_coords = ArrayXXd::Zero(ML, dim);
+  std::vector<ArrayXd> axes;
+  for (int i = 0; i < dim; i++) {
+    axes.push_back(ArrayXd::LinSpaced(Nx[i], 0.0, Lx[i] - dx[i]));
+  }
+  int n_reps = 1;
+  for (int d = 0; d < dim; d++) {
+    for (int i = 0; i < ML; i++) {
+      local_grid_coords(i, d) = axes[d][(i / n_reps) % Nx[d]];
+    }
+    n_reps *= Nx[d];
+  }
 }
 
 void Sim::init_component_list(YAML::Node input) {

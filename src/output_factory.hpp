@@ -6,6 +6,7 @@
 #define OUTPUT_FACTORY_HPP
 
 #include "output.hpp"
+#include "output_types/grid_output.hpp"
 #include "output_types/lammpstrj_output.hpp"
 #include "output_types/summary_output.hpp"
 #include "yaml-cpp/yaml.h"

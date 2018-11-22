@@ -19,10 +19,15 @@ components:
     n_segments_per_molecule: 20
 
 outputs:
+  grid:
+    print_freq: 5
+    column_width: 15
+    write_header: true
+    gnuplot_compatible: true
+  lammpstrj:
+    print_freq: 5
   summary:
     var_list: ["iter", "u_bond"]
     print_freq: 2
     column_width: 15
     write_header: true
-  lammpstrj:
-    print_freq: 5
