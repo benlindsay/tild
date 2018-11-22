@@ -20,7 +20,6 @@ Summary_Output::Summary_Output(Sim *sim, fs::path output_dir,
 void Summary_Output::init(Sim *_sim, std::vector<std::string> _var_list,
                           int _print_freq, fs::path _file_path,
                           int _column_width, bool _write_header) {
-  sim = _sim;
   var_list = _var_list;
   print_freq = _print_freq;
   file_path = _file_path;

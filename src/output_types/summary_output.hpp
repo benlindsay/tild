@@ -14,9 +14,9 @@ class Summary_Output : public Output {
   Summary_Output(Sim *sim, fs::path output_dir,
                  std::vector<std::string> var_list);
   virtual ~Summary_Output();
-  virtual bool is_time_to_write(void);
-  virtual void write(void);
-  virtual void write_iter_0(void);
+  virtual bool is_time_to_write();
+  virtual void write();
+  virtual void write_iter_0();
   static const std::string default_file_name;
 
  private:
