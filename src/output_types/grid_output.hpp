@@ -15,7 +15,6 @@ class Grid_Output : public Output {
   virtual ~Grid_Output(){};
   virtual bool is_time_to_write();
   virtual void write();
-  virtual void write_iter_0();
 
  private:
   void init(fs::path output_dir, int print_freq, int column_width,

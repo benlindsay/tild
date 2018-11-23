@@ -14,7 +14,6 @@ class Lammpstrj_Output : public Output {
                    bool one_frame_per_file);
   virtual ~Lammpstrj_Output();
   virtual bool is_time_to_write();
-  virtual void write_iter_0();
   virtual void write();
   static const std::string default_name;
 

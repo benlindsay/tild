@@ -141,14 +141,6 @@ void Sim::init_component_list(YAML::Node input) {
   }
 }
 
-void Sim::write_iter_0_outputs() {
-  for (size_t i = 0; i < output_list.size(); i++) {
-    if (output_list[i]->is_time_to_write()) {
-      output_list[i]->write_iter_0();
-    }
-  }
-}
-
 void Sim::write_outputs() {
   for (size_t i = 0; i < output_list.size(); i++) {
     if (output_list[i]->is_time_to_write()) {
@@ -159,7 +151,8 @@ void Sim::write_outputs() {
 
 void Sim::run() {
   utils::print_one_line("Running " + description);
-  write_iter_0_outputs();
+  // Write outputs for initial state
+  write_outputs();
   for (iter = 1; iter <= max_iter; iter++) {
     calculate_grid_densities();
     calculate_forces();

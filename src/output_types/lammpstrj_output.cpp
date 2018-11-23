@@ -36,13 +36,6 @@ bool Lammpstrj_Output::is_time_to_write(void) {
   }
 }
 
-void Lammpstrj_Output::write_iter_0() {
-  // std::stringstream ss;
-  // ss << "Hello lammpstrj!";
-  // utils::print_one_line(file, ss);
-  write();
-}
-
 void Lammpstrj_Output::write() {
   int n_sites_total = 0;
   for (int i = 0; i < component_list.size(); i++) {

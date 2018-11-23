@@ -88,5 +88,3 @@ void Grid_Output::write() {
     }
   }
 }
-
-void Grid_Output::write_iter_0() { write(); }

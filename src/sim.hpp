@@ -36,7 +36,6 @@ class Sim {
   virtual void move_particles() = 0;
   virtual void run();
   void init_component_list(YAML::Node input);
-  void write_iter_0_outputs();
   void write_outputs();
 
   std::string description;

@@ -41,11 +41,11 @@ void Summary_Output::init(Sim *sim, fs::path output_dir,
   init(sim, var_list, print_freq, file_path, column_width, write_header);
 }
 
-Summary_Output::~Summary_Output(void) { file.close(); }
+Summary_Output::~Summary_Output() { file.close(); }
 
 const std::string Summary_Output::default_file_name = "summary.dat";
 
-bool Summary_Output::is_time_to_write(void) {
+bool Summary_Output::is_time_to_write() {
   if (sim->iter % print_freq == 0 || sim->iter == sim->max_iter) {
     return true;
   } else {
@@ -53,19 +53,16 @@ bool Summary_Output::is_time_to_write(void) {
   }
 }
 
-void Summary_Output::write_iter_0(void) {
-  if (write_header) {
-    std::stringstream ss;
+void Summary_Output::write() {
+  std::stringstream ss;
+  if (write_header && sim->iter == 0) {
     for (size_t i = 0; i < var_list.size(); i++) {
       ss << " " << std::setw(column_width - 1) << var_list[i];
     }
     utils::print_one_line(file, ss);
   }
-  write();
-}
-
-void Summary_Output::write(void) {
-  std::stringstream ss;
+  // Clear stringstream
+  ss.str(std::string());
   for (size_t i = 0; i < var_list.size(); i++) {
     ss << sim->get_var_as_string(var_list[i], column_width);
   }

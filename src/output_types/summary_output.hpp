@@ -16,7 +16,6 @@ class Summary_Output : public Output {
   virtual ~Summary_Output();
   virtual bool is_time_to_write();
   virtual void write();
-  virtual void write_iter_0();
   static const std::string default_file_name;
 
  private:
