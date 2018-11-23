@@ -20,7 +20,7 @@ class Grid_Output : public Output {
   void init(fs::path output_dir, int print_freq, int column_width,
             bool write_header, bool gnuplot_compatible);
   void init(fs::path output_dir);
-  void write_one_file(fs::path file_path, ArrayXd& data);
+  void write_one_file(fs::path file_path, ArrayXd &data);
   fs::path output_dir;
   int print_freq;
   int column_width;
