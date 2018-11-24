@@ -55,6 +55,7 @@ class Sim {
   double V;
   int M;
   int ML;
+  int mesh_order;
 
   std::vector<Output*> output_list;
   std::vector<Component*> component_list;

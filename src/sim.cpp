@@ -126,6 +126,15 @@ void Sim::init_box_vars(YAML::Node input) {
     }
     n_reps *= Nx[d];
   }
+
+  if (!input["mesh_order"]) {
+    mesh_order = 1;
+  } else {
+    mesh_order = input["mesh_order"].as<int>();
+    if (mesh_order < 0 || mesh_order > 5) {
+      utils::die("mesh_order must be between 0 and 5 inclusive!");
+    }
+  }
 }
 
 void Sim::init_component_list(YAML::Node input) {

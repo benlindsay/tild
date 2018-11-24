@@ -7,6 +7,7 @@ sim_plan: single_sim
 sim_type: canonical
 output_dir: output
 max_iter: 10
+mesh_order: 2
 
 components:
   - type: homopolymer
