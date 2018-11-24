@@ -161,13 +161,16 @@ void Sim::write_outputs() {
 void Sim::run() {
   utils::print_one_line("Running " + description);
   // Write outputs for initial state
-  write_outputs();
-  for (iter = 1; iter <= max_iter; iter++) {
+  std::cout << "mesh_order: " << mesh_order << std::endl;
+  for (iter = 0; iter < max_iter; iter++) {
     calculate_grid_densities();
     calculate_forces();
-    move_particles();
     write_outputs();
+    move_particles();
   }
+  write_outputs();
+}
+
 void Sim::calculate_grid_densities() {
   for (int i_comp = 0; i_comp < component_list.size(); i_comp++) {
     component_list[i_comp]->calculate_grid_densities();
