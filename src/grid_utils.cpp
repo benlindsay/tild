@@ -11,6 +11,8 @@ void grid_utils::get_spline_weights(ArrayXd &dx_from_nearest_grid_point,
   int mesh_order = sim->mesh_order;
   double scale = double(sim->M) / sim->V;
   if (mesh_order == 0) {
+    // TODO: Is this true? Why the scale when grid weights sum to 1 along each
+    // dimension in all other cases?
     grid_weights = 1.0 * scale;
   } else if (mesh_order == 1) {
     grid_weights.col(0) = (1.0 - 2.0 * dx_norm) / 2.0;
