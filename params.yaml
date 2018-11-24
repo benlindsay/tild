@@ -1,7 +1,7 @@
 dim: 2
 
-Lx: [5, 6]
-Nx: [10, 10]
+Lx: [1.5, 2.5]
+Nx: [3, 5]
 rho_0: 10.0
 sim_plan: single_sim
 sim_type: canonical
