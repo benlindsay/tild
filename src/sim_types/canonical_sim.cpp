@@ -62,10 +62,6 @@ void Canonical_Sim::init_output_list(YAML::Node input) {
   }
 }
 
-void Canonical_Sim::calculate_grid_densities() {
-  // utils::print_one_line("Calculating grid densities");
-}
-
 void Canonical_Sim::calculate_forces() {
   // utils::print_one_line("Calculating forces");
 }

@@ -32,6 +32,9 @@ class Component {
     Species_Type species = static_cast<Species_Type>(int(c) - int('a'));
     return species;
   };
+  virtual void calculate_site_grid_weights(int i_site, ArrayXXd &grid_weights);
+  virtual void calculate_grid_densities();
+
   Sim *sim;
   std::string name;  // Name of component
   double vol_frac;   // Total volume fraction

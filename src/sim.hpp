@@ -13,6 +13,7 @@
 #include "component.hpp"
 #include "component_factory.hpp"
 #include "globals.hpp"
+#include "grid_utils.hpp"
 #include "output.hpp"
 #include "output_factory.hpp"
 #include "utils.hpp"
@@ -31,7 +32,7 @@ class Sim {
   virtual std::string get_var_as_string(std::string var_name, int str_len) = 0;
   virtual void init_default_summary_var_list() = 0;
   virtual void init_output_list(YAML::Node input) = 0;
-  virtual void calculate_grid_densities() = 0;
+  virtual void calculate_grid_densities();
   virtual void calculate_forces() = 0;
   virtual void move_particles() = 0;
   virtual void run();

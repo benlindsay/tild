@@ -168,4 +168,8 @@ void Sim::run() {
     move_particles();
     write_outputs();
   }
+void Sim::calculate_grid_densities() {
+  for (int i_comp = 0; i_comp < component_list.size(); i_comp++) {
+    component_list[i_comp]->calculate_grid_densities();
+  }
 }
