@@ -87,4 +87,13 @@ void grid_utils::get_spline_weights(ArrayXd &dx_from_nearest_grid_point,
   } else {
     utils::die("get_spline_weights not set up for this interpolation order!\n");
   }
+  // for (int d = 0; d < sim->dim; d++) {
+  //   ArrayXd col = grid_weights.col(d);
+  //   bool all_greater_than_0 = col.min(0).isApproxToConstant(0);
+  //   if (!all_greater_than_0) {
+  //     std::cout << "grid_weights:" << std::endl;
+  //     std::cout << grid_weights << std::endl;
+  //     utils::die("negative weights");
+  //   }
+  // }
 }
