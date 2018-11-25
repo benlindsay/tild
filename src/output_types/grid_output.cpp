@@ -31,7 +31,7 @@ void Grid_Output::init(fs::path _output_dir, int _print_freq, int _column_width,
 void Grid_Output::init(fs::path output_dir) {
   int print_freq = Output::default_print_freq;
   int column_width = Output::default_column_width;
-  bool write_header = true;
+  bool write_header = false;
   bool pm3d_compatible = true;
   init(output_dir, print_freq, column_width, write_header, pm3d_compatible);
 }

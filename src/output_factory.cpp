@@ -13,7 +13,7 @@ Output* Output_Factory::New_Output(Sim* sim, YAML::Node input,
     fs::path output_dir(input["output_dir"].as<std::string>());
     int print_freq = Output::default_print_freq;
     int column_width = Output::default_column_width;
-    bool write_header = true;
+    bool write_header = false;
     bool pm3d_compatible = true;
     for (YAML::const_iterator it = output_type_params.begin();
          it != output_type_params.end(); ++it) {

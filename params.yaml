@@ -23,7 +23,7 @@ outputs:
   grid:
     print_freq: 5
     column_width: 15
-    write_header: true
+    write_header: false
     pm3d_compatible: true
   lammpstrj:
     print_freq: 5
