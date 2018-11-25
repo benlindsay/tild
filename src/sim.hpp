@@ -20,8 +20,9 @@
 
 class Output;
 
-using Eigen::ArrayXd;  // Dynamically sized double Array
-using Eigen::ArrayXi;  // Dynamically sized int Array
+using Eigen::ArrayXd;   // Dynamically sized double Array
+using Eigen::ArrayXi;   // Dynamically sized int Array
+using Eigen::ArrayXXi;  // Dynamically sized 2D int Array
 
 // class FFTW_Utils;
 
@@ -36,6 +37,8 @@ class Sim {
   virtual void calculate_forces() = 0;
   virtual void move_particles() = 0;
   virtual void run();
+  int get_global_index(int ix_global, int iy_global);
+  int get_global_index(int ix_global, int iy_global, int iz_global);
   void init_component_list(YAML::Node input);
   void write_outputs();
 
@@ -55,8 +58,11 @@ class Sim {
   ArrayXXd local_grid_coords;
   double V;
   int M;
+  double grid_point_volume;
   int ML;
   int mesh_order;
+  int n_subgrid_points;
+  ArrayXXi weight_subgrid_index_shifts;
 
   std::vector<Output*> output_list;
   std::vector<Component*> component_list;

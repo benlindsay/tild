@@ -35,6 +35,8 @@ class Component {
   virtual void calculate_site_grid_weights(int i_site,
                                            ArrayXi &subgrid_center_indices,
                                            ArrayXXd &grid_weights);
+  virtual void add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
+                                ArrayXXd &grid_weights);
   virtual void calculate_grid_densities();
 
   Sim *sim;

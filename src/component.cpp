@@ -44,6 +44,55 @@ void Component::calculate_site_grid_weights(int i_site,
   }
 }
 
+void Component::add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
+                                 ArrayXXd &grid_weights) {
+  int left_shift = sim->mesh_order / 2 + sim->mesh_order % 2;
+  ArrayXXi subgrid_indices =
+      subgrid_center_indices.transpose().replicate(sim->n_subgrid_points, 1) -
+      left_shift + sim->weight_subgrid_index_shifts;
+  for (int i = 0; i < sim->n_subgrid_points; i++) {
+    int ix_global, iy_global, iz_global, global_index;
+    ix_global = subgrid_indices(i, 0);
+    ix_global = (ix_global + sim->Nx[0]) % sim->Nx[0];
+    iy_global = subgrid_indices(i, 1);
+    iy_global = (iy_global + sim->Nx[1]) % sim->Nx[1];
+    if (sim->dim == 2) {
+      global_index = sim->get_global_index(ix_global, iy_global);
+    } else {
+      iz_global = subgrid_indices(i, 2);
+      iz_global = (iz_global + sim->Nx[2]) % sim->Nx[2];
+      global_index = sim->get_global_index(ix_global, iy_global, iz_global);
+    }
+    if (global_index < 0 || global_index >= sim->M) {
+      utils::die("Bad index!");
+    }
+    int x_shift, y_shift, z_shift;
+    x_shift = sim->weight_subgrid_index_shifts(i, 0);
+    y_shift = sim->weight_subgrid_index_shifts(i, 1);
+    // Calculate the weight to add to the grid
+    double total_weight;
+    if (sim->dim == 2) {
+      total_weight = grid_weights(0, x_shift) * grid_weights(1, y_shift) /
+                     sim->grid_point_volume;
+    } else {
+      z_shift = sim->weight_subgrid_index_shifts(i, 2);
+      total_weight = grid_weights(0, x_shift) * grid_weights(1, y_shift) *
+                     grid_weights(2, z_shift) / sim->grid_point_volume;
+    }
+    double x_weight = grid_weights(0, x_shift);
+    double y_weight = grid_weights(1, y_shift);
+    if (x_weight < 0) {
+      utils::die("x_weight < 0");
+    }
+    if (y_weight < 0) {
+      utils::die("y_weight < 0");
+    }
+    // Actually add site to grid
+    Species_Type species = static_cast<Species_Type>(site_types[i_site]);
+    rho_center[species][global_index] += total_weight;
+  }
+}
+
 void Component::calculate_grid_densities() {
   ArrayXi subgrid_center_indices(sim->dim);
   ArrayXXd grid_weights(sim->dim, sim->mesh_order + 1);
@@ -51,5 +100,6 @@ void Component::calculate_grid_densities() {
     // Fill grid_weights array so that grid_weights(i, j) contains the weight
     // for dimension i of parameter j, where 0 <= j <= mesh_order + 1
     calculate_site_grid_weights(i_site, subgrid_center_indices, grid_weights);
+    add_site_to_grid(i_site, subgrid_center_indices, grid_weights);
   }
 }

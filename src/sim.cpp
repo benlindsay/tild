@@ -109,9 +109,10 @@ void Sim::init_box_vars(YAML::Node input) {
     dx = Lx / Nx.cast<double>();
   }
 
-  // Assign V and M
+  // Assign aggregate values
   V = Lx.prod();
   M = Nx.prod();
+  grid_point_volume = dx.prod();  // Also = V / double(M)
   ML = M;
 
   local_grid_coords = ArrayXXd::Zero(ML, dim);
@@ -134,6 +135,16 @@ void Sim::init_box_vars(YAML::Node input) {
     if (mesh_order < 0 || mesh_order > 5) {
       utils::die("mesh_order must be between 0 and 5 inclusive!");
     }
+  }
+
+  n_subgrid_points = std::pow(mesh_order + 1, dim);
+  weight_subgrid_index_shifts = ArrayXXi::Zero(n_subgrid_points, dim);
+  n_reps = 1;
+  for (int d = 0; d < dim; d++) {
+    for (int i = 0; i < n_subgrid_points; i++) {
+      weight_subgrid_index_shifts(i, d) = (i / n_reps) % (mesh_order + 1);
+    }
+    n_reps *= mesh_order + 1;
   }
 }
 
@@ -173,6 +184,21 @@ void Sim::run() {
 
 void Sim::calculate_grid_densities() {
   for (int i_comp = 0; i_comp < component_list.size(); i_comp++) {
-    component_list[i_comp]->calculate_grid_densities();
+    Component *comp = component_list[i_comp];
+    for (auto it = comp->rho_center.begin(); it != comp->rho_center.end();
+         it++) {
+      // it->second points to the actual density array, for example
+      // rho_center[A]
+      it->second = ArrayXd::Zero(ML);
+    }
+    comp->calculate_grid_densities();
   }
+}
+
+int Sim::get_global_index(int ix_global, int iy_global) {
+  return ix_global + Nx[0] * iy_global;
+}
+
+int Sim::get_global_index(int ix_global, int iy_global, int iz_global) {
+  return ix_global + Nx[0] * iy_global + Nx[0] * Nx[1] * iz_global;
 }
