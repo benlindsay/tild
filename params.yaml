@@ -24,7 +24,7 @@ outputs:
     print_freq: 5
     column_width: 15
     write_header: true
-    gnuplot_compatible: true
+    pm3d_compatible: true
   lammpstrj:
     print_freq: 5
   summary:

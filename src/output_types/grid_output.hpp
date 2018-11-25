@@ -10,7 +10,7 @@
 class Grid_Output : public Output {
  public:
   Grid_Output(Sim *sim, fs::path output_dir, int print_freq, int column_width,
-              bool write_header, bool gnuplot_compatible);
+              bool write_header, bool pm3d_compatible);
   Grid_Output(Sim *sim, fs::path output_dir);
   virtual ~Grid_Output(){};
   virtual bool is_time_to_write();
@@ -18,14 +18,14 @@ class Grid_Output : public Output {
 
  private:
   void init(fs::path output_dir, int print_freq, int column_width,
-            bool write_header, bool gnuplot_compatible);
+            bool write_header, bool pm3d_compatible);
   void init(fs::path output_dir);
   void write_one_file(fs::path file_path, ArrayXd &data);
   fs::path output_dir;
   int print_freq;
   int column_width;
   bool write_header;
-  bool gnuplot_compatible;
+  bool pm3d_compatible;
   fs::ofstream file;
 };
 

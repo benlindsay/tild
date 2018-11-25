@@ -14,7 +14,7 @@ Output* Output_Factory::New_Output(Sim* sim, YAML::Node input,
     int print_freq = Output::default_print_freq;
     int column_width = Output::default_column_width;
     bool write_header = true;
-    bool gnuplot_compatible = true;
+    bool pm3d_compatible = true;
     for (YAML::const_iterator it = output_type_params.begin();
          it != output_type_params.end(); ++it) {
       std::string key = it->first.as<std::string>();
@@ -25,15 +25,15 @@ Output* Output_Factory::New_Output(Sim* sim, YAML::Node input,
         column_width = value.as<int>();
       } else if (key == "write_header") {
         write_header = value.as<bool>();
-      } else if (key == "gnuplot_compatible") {
-        gnuplot_compatible = value.as<bool>();
+      } else if (key == "pm3d_compatible") {
+        pm3d_compatible = value.as<bool>();
       } else {
         utils::die("Can't recognize grid output parameter '" +
                    value.as<std::string>() + "'");
       }
     }
     return new Grid_Output(sim, output_dir, print_freq, column_width,
-                           write_header, gnuplot_compatible);
+                           write_header, pm3d_compatible);
   } else if (output_type == "lammpstrj") {
     fs::path output_dir(input["output_dir"].as<std::string>());
     int print_freq = Output::default_print_freq;

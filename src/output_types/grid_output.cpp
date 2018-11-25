@@ -6,9 +6,9 @@
 
 Grid_Output::Grid_Output(Sim *sim, fs::path output_dir, int print_freq,
                          int column_width, bool write_header,
-                         bool gnuplot_compatible)
+                         bool pm3d_compatible)
     : Output(sim) {
-  init(output_dir, print_freq, column_width, write_header, gnuplot_compatible);
+  init(output_dir, print_freq, column_width, write_header, pm3d_compatible);
 }
 
 Grid_Output::Grid_Output(Sim *sim, fs::path output_dir) : Output(sim) {
@@ -16,20 +16,24 @@ Grid_Output::Grid_Output(Sim *sim, fs::path output_dir) : Output(sim) {
 }
 
 void Grid_Output::init(fs::path _output_dir, int _print_freq, int _column_width,
-                       bool _write_header, bool _gnuplot_compatible) {
+                       bool _write_header, bool _pm3d_compatible) {
   output_dir = _output_dir;
   print_freq = _print_freq;
   column_width = _column_width;
   write_header = _write_header;
-  gnuplot_compatible = _gnuplot_compatible;
+  pm3d_compatible = _pm3d_compatible;
+  if (sim->dim == 3) {
+    // No reason to put blank lines in the file for 3D data
+    pm3d_compatible = false;
+  }
 }
 
 void Grid_Output::init(fs::path output_dir) {
   int print_freq = Output::default_print_freq;
   int column_width = Output::default_column_width;
   bool write_header = true;
-  bool gnuplot_compatible = true;
-  init(output_dir, print_freq, column_width, write_header, gnuplot_compatible);
+  bool pm3d_compatible = true;
+  init(output_dir, print_freq, column_width, write_header, pm3d_compatible);
 }
 
 bool Grid_Output::is_time_to_write() {
@@ -42,7 +46,7 @@ bool Grid_Output::is_time_to_write() {
 
 void Grid_Output::write_one_file(fs::path file_path, ArrayXd &data) {
   file.open(file_path);
-  if (write_header) {
+  if (write_header && !pm3d_compatible) {
     file << " " << std::setw(column_width - 1) << "x";
     file << " " << std::setw(column_width - 1) << "y";
     if (sim->dim == 3) {
@@ -63,6 +67,9 @@ void Grid_Output::write_one_file(fs::path file_path, ArrayXd &data) {
            << sim->local_grid_coords(i, d);
     }
     file << " " << data[i] << "\n";
+    if (pm3d_compatible && (i + 1) % sim->Nx[0] == 0) {
+      file << "\n";
+    }
   }
   file.close();
 }
