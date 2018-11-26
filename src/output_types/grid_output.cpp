@@ -77,8 +77,8 @@ void Grid_Output::write_one_file(fs::path file_path, ArrayXd &data) {
 void Grid_Output::write() {
   for (int i = 0; i < sim->component_list.size(); i++) {
     Component *comp = sim->component_list[i];
-    for (auto it = comp->rho_center.begin(); it != comp->rho_center.end();
-         it++) {
+    for (auto it = comp->rho_center_map.begin();
+         it != comp->rho_center_map.end(); it++) {
       Component::Species_Type species = it->first;
       ArrayXd rho_center = it->second;
       char species_char = Component::species_enum_to_char(species);

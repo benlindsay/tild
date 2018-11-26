@@ -185,10 +185,10 @@ void Sim::run() {
 void Sim::calculate_grid_densities() {
   for (int i_comp = 0; i_comp < component_list.size(); i_comp++) {
     Component *comp = component_list[i_comp];
-    for (auto it = comp->rho_center.begin(); it != comp->rho_center.end();
-         it++) {
-      // it->second points to the actual density array, for example
-      // rho_center[A]
+    for (auto it = comp->rho_center_map.begin();
+         it != comp->rho_center_map.end(); it++) {
+      // it->second points to the actual rho_center density array, for example
+      // rho_center_map[A]
       it->second = ArrayXd::Zero(ML);
     }
     comp->calculate_grid_densities();

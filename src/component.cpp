@@ -89,7 +89,7 @@ void Component::add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
     }
     // Actually add site to grid
     Species_Type species = static_cast<Species_Type>(site_types[i_site]);
-    rho_center[species][global_index] += total_weight;
+    rho_center_map[species][global_index] += total_weight;
   }
 }
 

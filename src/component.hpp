@@ -49,10 +49,10 @@ class Component {
   // Store the center density distributions for each species in the component in
   // a map data structure. For example, the B species center density array can
   // be accessed in any of the following ways:
-  //   ArrayXd rho_b = rho_center[1];
-  //   ArrayXd rho_b = rho_center[Component::B];
-  //   Species_Type b = Component::B; ArrayXd rho_b = rho_center[b]
-  std::map<Species_Type, ArrayXd> rho_center;
+  //   ArrayXd rho_b = rho_center_map[1];
+  //   ArrayXd rho_b = rho_center_map[Component::B];
+  //   Species_Type b = Component::B; ArrayXd rho_b = rho_center_map[b]
+  std::map<Species_Type, ArrayXd> rho_center_map;
 
   ArrayXi site_types;    // Array of species type for each site
   ArrayXi molecule_ids;  // Each component has ids from 0 to n_molecules so that
