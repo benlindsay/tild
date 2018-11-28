@@ -29,6 +29,20 @@ Sim::Sim(YAML::Node input) {
     rho_0 = input["rho_0"].as<double>();
   }
 
+  // Initialize bond_length
+  if (!input["bond_length"]) {
+    bond_length = 1.0;
+  } else {
+    bond_length = input["bond_length"].as<double>();
+  }
+
+  // Initialize monomer_size
+  if (!input["monomer_size"]) {
+    monomer_size = 1.0;
+  } else {
+    monomer_size = input["monomer_size"].as<double>();
+  }
+
   // Initialize box/grid variables
   init_box_vars(input);
 

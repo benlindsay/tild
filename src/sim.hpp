@@ -50,6 +50,8 @@ class Sim {
   int iter;
   int max_iter;
   double rho_0;
+  double bond_length;
+  double monomer_size;
 
   // Grid/box variables
   ArrayXd Lx;
