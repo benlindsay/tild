@@ -55,6 +55,7 @@ class Sim {
   ArrayXd Lx;
   ArrayXi Nx;
   ArrayXd dx;
+  ArrayXXi local_grid_indices;
   ArrayXXd local_grid_coords;
   double V;
   int M;

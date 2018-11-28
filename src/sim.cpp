@@ -115,17 +115,18 @@ void Sim::init_box_vars(YAML::Node input) {
   grid_point_volume = dx.prod();  // Also = V / double(M)
   ML = M;
 
-  local_grid_coords = ArrayXXd::Zero(ML, dim);
-  std::vector<ArrayXd> axes;
-  for (int i = 0; i < dim; i++) {
-    axes.push_back(ArrayXd::LinSpaced(Nx[i], 0.0, Lx[i] - dx[i]));
-  }
+  local_grid_indices = ArrayXXi::Zero(ML, dim);
   int n_reps = 1;
   for (int d = 0; d < dim; d++) {
     for (int i = 0; i < ML; i++) {
-      local_grid_coords(i, d) = axes[d][(i / n_reps) % Nx[d]];
+      local_grid_indices(i, d) = (i / n_reps) % Nx[d];
     }
     n_reps *= Nx[d];
+  }
+
+  local_grid_coords = ArrayXXd::Zero(ML, dim);
+  for (int d = 0; d < dim; d++) {
+    local_grid_coords.col(d) = local_grid_indices.col(d).cast<double>() * dx[d];
   }
 
   if (!input["mesh_order"]) {
