@@ -129,6 +129,20 @@ void Sim::init_box_vars(YAML::Node input) {
     local_grid_coords.col(d) = local_grid_indices.col(d).cast<double>() * dx[d];
   }
 
+  local_grid_k_coords = ArrayXXd::Zero(ML, dim);
+  for (int d = 0; d < dim; d++) {
+    for (int i = 0; i < ML; i++) {
+      int index_i_d = local_grid_indices(i, d);
+      if (double(index_i_d) < double(Nx[d]) / 2.0) {
+        local_grid_k_coords(i, d) = 2 * PI * double(index_i_d) / Lx[d];
+      } else {
+        local_grid_k_coords(i, d) = 2 * PI * double(index_i_d - Nx[d]) / Lx[d];
+      }
+    }
+  }
+
+  local_grid_k_magnitude = local_grid_k_coords.square().rowwise().sum();
+
   if (!input["mesh_order"]) {
     mesh_order = 1;
   } else {
