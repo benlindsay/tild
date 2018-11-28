@@ -18,7 +18,7 @@ if [ ! -f /tmp/$tarball ]; then
   if [ $(command -v wget) ]; then
     wget -O /tmp/$tarball $url
   elif [ $(command -v curl) ]; then
-    curl -o /tmp/$tarball $url
+    curl -o /tmp/$tarball -L $url
   fi
 else
   echo "/tmp/$tarball already downloaded."
