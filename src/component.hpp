@@ -56,6 +56,8 @@ class Component {
   //   Species_Type b = Component::B; ArrayXd rho_b = rho_center_map[b]
   std::map<Species_Type, ArrayXd> rho_center_map;
 
+  std::map<Species_Type, ArrayXd> conv_function_map;
+
   ArrayXi site_types;    // Array of species type for each site
   ArrayXi molecule_ids;  // Each component has ids from 0 to n_molecules so that
                          // they don't have change if other components add or
