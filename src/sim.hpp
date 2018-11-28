@@ -67,6 +67,9 @@ class Sim {
   int n_subgrid_points;
   ArrayXXi weight_subgrid_index_shifts;
 
+  // Potential variables
+  std::vector<std::vector<ArrayXd> > pair_potential_arrays;
+
   std::vector<Output*> output_list;
   std::vector<Component*> component_list;
   std::vector<std::string> default_summary_var_list;

@@ -143,6 +143,18 @@ void Sim::init_box_vars(YAML::Node input) {
 
   local_grid_k_magnitude = local_grid_k_coords.square().rowwise().sum();
 
+  pair_potential_arrays = std::vector<std::vector<ArrayXd> >(
+      Component::max_n_species,
+      std::vector<ArrayXd>(Component::max_n_species, ArrayXd()));
+
+  pair_potential_arrays[0][0] = ArrayXd::LinSpaced(5, 0, 0.8);
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      std::cout << "i, j = (" << i << ", " << j << "):" << std::endl;
+      std::cout << pair_potential_arrays[i][j] << std::endl;
+    }
+  }
+
   if (!input["mesh_order"]) {
     mesh_order = 1;
   } else {

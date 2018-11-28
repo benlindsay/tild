@@ -32,6 +32,8 @@ class Component {
     Species_Type species = static_cast<Species_Type>(int(c) - int('a'));
     return species;
   };
+  static const int max_n_species =
+      7;  // Should match number of letters in Species_Type enum above
   virtual void calculate_site_grid_weights(int i_site,
                                            ArrayXi &subgrid_center_indices,
                                            ArrayXXd &grid_weights);
