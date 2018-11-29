@@ -35,6 +35,7 @@ before_install:
   - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-$GCC_V /usr/bin/g++
   - echo $(g++ --version)
   - sudo apt-get install libfftw3-dev
+  - sudo apt-get install libgoogle-perftools-dev
 script:
   - tools/install-clang-format.sh 4
   - tools/clang-format-diff.sh
