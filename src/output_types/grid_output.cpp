@@ -146,5 +146,25 @@ void Grid_Output::write() {
       fs::path file_path = output_dir / file_name;
       write_one_file(file_path, conv_function);
     }
+
+    // Write pair potentials
+    for (int i = 0; i < Component::max_n_species; i++) {
+      for (int j = i; j < Component::max_n_species; j++) {
+        if (sim->pair_potential_arrays[i][j].size() == 0) {
+          continue;
+        }
+        std::ostringstream file_name_ss;
+        file_name_ss << "pair_potential_" << char('a' + i) << "_"
+                     << char('a' + j);
+        if (NPROCS > 1) {
+          // Make the file name look like pair_potential_a_a.04.dat
+          file_name_ss << "." << std::setw(2) << std::setfill('0') << RANK;
+        }
+        file_name_ss << ".dat";
+        std::string file_name(file_name_ss.str());
+        fs::path file_path = output_dir / file_name;
+        write_one_file(file_path, sim->pair_potential_arrays[i][j]);
+      }
+    }
   }
 }

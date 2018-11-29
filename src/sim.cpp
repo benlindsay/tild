@@ -49,6 +49,8 @@ Sim::Sim(YAML::Node input) {
   // Initialize components
   init_component_list(input);
 
+  init_potentials();
+
   // Initialize forces
 }
 
@@ -158,18 +160,6 @@ void Sim::init_box_vars(YAML::Node input) {
 
   local_grid_k_magnitude_squared = local_grid_k_coords.square().rowwise().sum();
 
-  pair_potential_arrays = std::vector<std::vector<ArrayXd> >(
-      Component::max_n_species,
-      std::vector<ArrayXd>(Component::max_n_species, ArrayXd()));
-
-  pair_potential_arrays[0][0] = ArrayXd::LinSpaced(5, 0, 0.8);
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      std::cout << "i, j = (" << i << ", " << j << "):" << std::endl;
-      std::cout << pair_potential_arrays[i][j] << std::endl;
-    }
-  }
-
   if (!input["mesh_order"]) {
     mesh_order = 1;
   } else {
@@ -200,6 +190,27 @@ void Sim::init_component_list(YAML::Node input) {
     Component *comp =
         Component_Factory::New_Component(this, input, components[i]);
     component_list.push_back(comp);
+  }
+}
+
+void Sim::init_potentials() {
+  pair_potential_arrays = std::vector<std::vector<ArrayXd> >(
+      Component::max_n_species,
+      std::vector<ArrayXd>(Component::max_n_species, ArrayXd()));
+
+  for (auto it_1 = conv_function_map.begin(); it_1 != conv_function_map.end();
+       it_1++) {
+    int species_int_i = static_cast<int>(it_1->first);
+    ArrayXd conv_func_i = it_1->second;
+    for (auto it_2 = it_1; it_2 != conv_function_map.end(); it_2++) {
+      int species_int_j = static_cast<int>(it_2->first);
+      ArrayXd conv_func_j = it_2->second;
+      ArrayXd pair_potential = ArrayXd::Zero(ML);
+      convolve(conv_func_i, conv_func_j, pair_potential);
+      // Add a factor of V which is necessary for future FFT operations
+      pair_potential *= V;
+      pair_potential_arrays[species_int_i][species_int_j] = pair_potential;
+    }
   }
 }
 

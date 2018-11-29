@@ -47,6 +47,7 @@ class Sim {
   int get_global_index(int ix_global, int iy_global);
   int get_global_index(int ix_global, int iy_global, int iz_global);
   void init_component_list(YAML::Node input);
+  void init_potentials();
   void write_outputs();
   void init_fftw();
   void fftw_fwd(ArrayXd &in_array, ArrayXcd &out_array);
@@ -84,6 +85,8 @@ class Sim {
   std::map<Component::Species_Type, ArrayXd> conv_function_map;
 
   std::vector<std::vector<ArrayXd> > pair_potential_arrays;
+  std::vector<std::vector<ArrayXXd> > pair_potential_gradient_arrays;
+  std::vector<std::vector<ArrayXXd> > pair_potential_gradient_hat_arrays;
 
   std::vector<Output *> output_list;
   std::vector<Component *> component_list;
