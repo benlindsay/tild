@@ -41,11 +41,12 @@ class Sim {
   virtual void init_default_summary_var_list() = 0;
   virtual void init_output_list(YAML::Node input) = 0;
   virtual void calculate_grid_densities();
-  virtual void calculate_forces() = 0;
+  virtual void calculate_forces();
   virtual void move_particles() = 0;
   virtual void run();
   int get_global_index(int ix_global, int iy_global);
   int get_global_index(int ix_global, int iy_global, int iz_global);
+  ArrayXd pbc_r2_minus_r1(ArrayXd r1, ArrayXd r2);
   void init_component_list(YAML::Node input);
   void init_potentials();
   void write_outputs();
@@ -87,6 +88,10 @@ class Sim {
   std::vector<std::vector<ArrayXd> > pair_potential_arrays;
   std::vector<std::vector<ArrayXXd> > pair_potential_gradient_arrays;
   std::vector<std::vector<ArrayXXd> > pair_potential_gradient_hat_arrays;
+
+  // Energy variables
+  double bond_energy;
+  double nonbond_energy;
 
   std::vector<Output *> output_list;
   std::vector<Component *> component_list;

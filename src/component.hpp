@@ -40,6 +40,7 @@ class Component {
   virtual void add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
                                 ArrayXXd &grid_weights);
   virtual void calculate_grid_densities();
+  virtual double calculate_bond_forces_and_energy() = 0;
 
   Sim *sim;
   std::string name;  // Name of component
@@ -61,6 +62,7 @@ class Component {
                          // they don't have change if other components add or
                          // subtract molecules
   ArrayXXd site_coords;  // Coordinates of sites
+  ArrayXXd site_forces;  // Coordinates of sites
 };
 
 #include "component_types/homopolymer.hpp"

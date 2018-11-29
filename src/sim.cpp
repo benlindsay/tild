@@ -248,12 +248,42 @@ void Sim::calculate_grid_densities() {
   }
 }
 
+void Sim::calculate_forces() {
+  bond_energy = 0.0;
+  nonbond_energy = 0.0;
+  for (int i_comp = 0; i_comp < component_list.size(); i_comp++) {
+    Component *comp = component_list[i_comp];
+    // Zero forces array
+    comp->site_forces = ArrayXXd::Zero(comp->n_sites, dim);
+    bond_energy += comp->calculate_bond_forces_and_energy();
+    for (auto it = comp->rho_center_map.begin();
+         it != comp->rho_center_map.end(); it++) {
+      // it->second points to the actual rho_center density array, for example
+      // rho_center_map[A]
+      it->second = ArrayXd::Zero(ML);
+    }
+    comp->calculate_grid_densities();
+  }
+}
+
 int Sim::get_global_index(int ix_global, int iy_global) {
   return ix_global + Nx[0] * iy_global;
 }
 
 int Sim::get_global_index(int ix_global, int iy_global, int iz_global) {
   return ix_global + Nx[0] * iy_global + Nx[0] * Nx[1] * iz_global;
+}
+
+ArrayXd Sim::pbc_r2_minus_r1(ArrayXd r1, ArrayXd r2) {
+  ArrayXd diff = r2 - r1;
+  for (int d = 0; d < dim; d++) {
+    if (diff[d] >= Lx[d] / 2.0) {
+      diff[d] -= Lx[d];
+    } else if (diff[d] < -Lx[d] / 2.0) {
+      diff[d] += Lx[d];
+    }
+  }
+  return diff;
 }
 
 void Sim::init_fftw() {

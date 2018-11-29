@@ -12,6 +12,7 @@ class Homopolymer : public Component {
   Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
               Component::Species_Type species);
   virtual ~Homopolymer(){};
+  virtual double calculate_bond_forces_and_energy();
   Component::Species_Type species;
   int n_segments_per_molecule;
 };

@@ -27,8 +27,10 @@ std::string Canonical_Sim::get_var_as_string(std::string var_name,
   os << std::scientific;
   if (var_name_lower == "iter") {
     os << iter;
-  } else if (var_name_lower == "u_bond") {
-    os << 42.0;
+  } else if (var_name_lower == "bond_energy") {
+    os << bond_energy;
+  } else if (var_name_lower == "nonbond_energy") {
+    os << nonbond_energy;
   } else {
     utils::die("Can't find match for " + var_name);
   }
@@ -37,7 +39,8 @@ std::string Canonical_Sim::get_var_as_string(std::string var_name,
 
 void Canonical_Sim::init_default_summary_var_list() {
   default_summary_var_list.push_back("iter");
-  default_summary_var_list.push_back("u_bond");
+  default_summary_var_list.push_back("bond_energy");
+  default_summary_var_list.push_back("nonbond_energy");
 }
 
 void Canonical_Sim::init_output_list(YAML::Node input) {
@@ -60,10 +63,6 @@ void Canonical_Sim::init_output_list(YAML::Node input) {
       output_list.push_back(output);
     }
   }
-}
-
-void Canonical_Sim::calculate_forces() {
-  // utils::print_one_line("Calculating forces");
 }
 
 void Canonical_Sim::move_particles() {

@@ -69,3 +69,19 @@ Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
     sim->conv_function_map[species] = conv_function;
   }
 }
+
+double Homopolymer::calculate_bond_forces_and_energy() {
+  double bond_energy = 0.0;
+  for (int i_mol = 0; i_mol < n_molecules; i_mol++) {
+    for (int i_seg = 0; i_seg < n_segments_per_molecule - 1; i_seg++) {
+      int site_1 = i_mol * n_segments_per_molecule + i_seg;
+      int site_2 = site_1 + 1;
+      ArrayXd dr = sim->pbc_r2_minus_r1(site_coords.row(site_1),
+                                        site_coords.row(site_2));
+      bond_energy += 1.5 * dr.square().sum();
+      site_forces.row(site_1) += 3.0 * dr;
+      site_forces.row(site_2) -= 3.0 * dr;
+    }
+  }
+  return bond_energy;
+}
