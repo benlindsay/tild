@@ -9,7 +9,7 @@ timestep: 0.001
 sim_plan: single_sim
 sim_type: canonical
 output_dir: output
-max_iter: 1000
+max_iter: 100
 mesh_order: 2
 
 components:
