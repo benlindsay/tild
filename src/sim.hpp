@@ -71,7 +71,7 @@ class Sim {
   ArrayXXi local_grid_indices;
   ArrayXXd local_grid_coords;
   ArrayXXd local_grid_k_coords;
-  ArrayXd local_grid_k_magnitude;
+  ArrayXd local_grid_k_magnitude_squared;
   double V;
   int M;
   double grid_point_volume;

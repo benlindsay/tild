@@ -156,7 +156,7 @@ void Sim::init_box_vars(YAML::Node input) {
     }
   }
 
-  local_grid_k_magnitude = local_grid_k_coords.square().rowwise().sum();
+  local_grid_k_magnitude_squared = local_grid_k_coords.square().rowwise().sum();
 
   pair_potential_arrays = std::vector<std::vector<ArrayXd> >(
       Component::max_n_species,
