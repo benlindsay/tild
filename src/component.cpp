@@ -44,40 +44,46 @@ void Component::calculate_site_grid_weights(int i_site,
 void Component::add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
                                  ArrayXXd &grid_weights) {
   int left_shift = sim->mesh_order / 2 + sim->mesh_order % 2;
-  ArrayXXi subgrid_indices =
-      subgrid_center_indices.transpose().replicate(sim->n_subgrid_points, 1) -
-      left_shift + sim->weight_subgrid_index_shifts;
+  ArrayXXi subgrid_indices = sim->weight_subgrid_index_shifts.rowwise() +
+                             subgrid_center_indices.transpose() - left_shift;
+  int *subgrid_indices_ptr = subgrid_indices.data();
+  int *Nx_ptr = sim->Nx.data();
   for (int i = 0; i < sim->n_subgrid_points; i++) {
     int ix_global, iy_global, iz_global, global_index;
-    ix_global = subgrid_indices(i, 0);
-    ix_global = (ix_global + sim->Nx[0]) % sim->Nx[0];
-    iy_global = subgrid_indices(i, 1);
-    iy_global = (iy_global + sim->Nx[1]) % sim->Nx[1];
+    ix_global = subgrid_indices_ptr[i];
+    ix_global = (ix_global + Nx_ptr[0]) % Nx_ptr[0];
+    iy_global = subgrid_indices_ptr[i + sim->n_subgrid_points];
+    iy_global = (iy_global + Nx_ptr[1]) % Nx_ptr[1];
     if (sim->dim == 2) {
       global_index = sim->get_global_index(ix_global, iy_global);
     } else {
-      iz_global = subgrid_indices(i, 2);
-      iz_global = (iz_global + sim->Nx[2]) % sim->Nx[2];
+      iz_global = subgrid_indices_ptr[i + 2 * sim->n_subgrid_points];
+      iz_global = (iz_global + Nx_ptr[2]) % Nx_ptr[2];
       global_index = sim->get_global_index(ix_global, iy_global, iz_global);
     }
     if (global_index < 0 || global_index >= sim->M) {
       utils::die("Bad index!");
     }
     int x_shift, y_shift, z_shift;
-    x_shift = sim->weight_subgrid_index_shifts(i, 0);
-    y_shift = sim->weight_subgrid_index_shifts(i, 1);
+    int *weight_subgrid_index_shifts_ptr =
+        sim->weight_subgrid_index_shifts.data();
+    x_shift = weight_subgrid_index_shifts_ptr[i];
+    y_shift = weight_subgrid_index_shifts_ptr[i + sim->n_subgrid_points];
     // Calculate the weight to add to the grid
     double total_weight;
+    double *grid_weights_ptr = grid_weights.data();
     if (sim->dim == 2) {
       total_weight = grid_weights(0, x_shift) * grid_weights(1, y_shift) /
                      sim->grid_point_volume;
     } else {
-      z_shift = sim->weight_subgrid_index_shifts(i, 2);
-      total_weight = grid_weights(0, x_shift) * grid_weights(1, y_shift) *
-                     grid_weights(2, z_shift) / sim->grid_point_volume;
+      z_shift = weight_subgrid_index_shifts_ptr[i + 2 * sim->dim];
+      total_weight = grid_weights_ptr[x_shift * sim->dim] *
+                     grid_weights_ptr[1 + y_shift * sim->dim] *
+                     grid_weights_ptr[2 + z_shift * sim->dim] /
+                     sim->grid_point_volume;
     }
-    double x_weight = grid_weights(0, x_shift);
-    double y_weight = grid_weights(1, y_shift);
+    double x_weight = grid_weights_ptr[x_shift * sim->dim];
+    double y_weight = grid_weights_ptr[1 + y_shift * sim->dim];
     if (x_weight < 0) {
       utils::die("x_weight < 0");
     }
