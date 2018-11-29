@@ -15,7 +15,6 @@ class Canonical_Sim : public Sim {
   virtual std::string get_var_as_string(std::string var_name, int str_len);
   virtual void init_default_summary_var_list();
   virtual void init_output_list(YAML::Node input);
-  virtual void move_particles();
 };
 
 #endif  // CANONICAL_SIM_HPP

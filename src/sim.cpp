@@ -43,11 +43,38 @@ Sim::Sim(YAML::Node input) {
     monomer_size = input["monomer_size"].as<double>();
   }
 
+  // Initialize timestep
+  if (!input["timestep"]) {
+    timestep = 1.0;
+  } else {
+    timestep = input["timestep"].as<double>();
+  }
+
   // Initialize box/grid variables
   init_box_vars(input);
 
   // Initialize components
   init_component_list(input);
+
+  // Initialize diffusion coefficients
+  if (input["diffusion_coeffs"]) {
+    for (YAML::const_iterator it = input["diffusion_coeffs"].begin();
+         it != input["diffusion_coeffs"].end(); ++it) {
+      char species_char = it->first.as<char>();
+      double diffusion_coeff = it->second.as<double>();
+      Component::Species_Type species =
+          Component::species_char_to_enum(species_char);
+      diffusion_coeff_map[species] = diffusion_coeff;
+    }
+  }
+  // Set diffusion coefficients to 1.0 if not provided
+  for (auto it = conv_function_map.begin(); it != conv_function_map.end();
+       it++) {
+    Component::Species_Type species = it->first;
+    if (diffusion_coeff_map.count(species) == 0) {
+      diffusion_coeff_map[species] = 1.0;
+    }
+  }
 
   init_potentials();
 
@@ -225,7 +252,6 @@ void Sim::write_outputs() {
 void Sim::run() {
   utils::print_one_line("Running " + description);
   // Write outputs for initial state
-  std::cout << "mesh_order: " << mesh_order << std::endl;
   for (iter = 0; iter < max_iter; iter++) {
     calculate_grid_densities();
     calculate_forces();
@@ -263,6 +289,13 @@ void Sim::calculate_forces() {
       it->second = ArrayXd::Zero(ML);
     }
     comp->calculate_grid_densities();
+  }
+}
+
+void Sim::move_particles() {
+  for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
+    Component *comp = component_list[i_comp];
+    comp->move_particles();
   }
 }
 

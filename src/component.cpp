@@ -39,9 +39,6 @@ void Component::calculate_site_grid_weights(int i_site,
     // Nx[j]? why use boundary grid point instead of 0 grid point?
   }
   grid_utils::get_spline_weights(dx_from_nearest_grid_point, grid_weights, sim);
-  if (sim->iter == 0 && i_site == 0) {
-    std::cout << grid_weights << std::endl;
-  }
 }
 
 void Component::add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
@@ -102,4 +99,14 @@ void Component::calculate_grid_densities() {
     calculate_site_grid_weights(i_site, subgrid_center_indices, grid_weights);
     add_site_to_grid(i_site, subgrid_center_indices, grid_weights);
   }
+}
+
+void Component::move_particles() {
+  ArrayXd diffusion_coeffs(n_sites);
+  for (int i = 0; i < n_sites; i++) {
+    Species_Type species = static_cast<Species_Type>(site_types[i]);
+    diffusion_coeffs[i] = sim->diffusion_coeff_map[species];
+  }
+  site_coords += site_forces.colwise() * diffusion_coeffs * sim->timestep;
+  utils::enforce_pbc(site_coords, sim->Lx);
 }

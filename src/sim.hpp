@@ -42,7 +42,7 @@ class Sim {
   virtual void init_output_list(YAML::Node input) = 0;
   virtual void calculate_grid_densities();
   virtual void calculate_forces();
-  virtual void move_particles() = 0;
+  virtual void move_particles();
   virtual void run();
   int get_global_index(int ix_global, int iy_global);
   int get_global_index(int ix_global, int iy_global, int iz_global);
@@ -62,6 +62,7 @@ class Sim {
   int dim;
   int iter;
   int max_iter;
+  double timestep;
   double rho_0;
   double bond_length;
   double monomer_size;
@@ -96,6 +97,8 @@ class Sim {
   std::vector<Output *> output_list;
   std::vector<Component *> component_list;
   std::vector<std::string> default_summary_var_list;
+
+  std::map<Component::Species_Type, double> diffusion_coeff_map;
 
   // FFTW variables
   fftw_plan forward_plan;

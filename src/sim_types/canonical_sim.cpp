@@ -65,8 +65,4 @@ void Canonical_Sim::init_output_list(YAML::Node input) {
   }
 }
 
-void Canonical_Sim::move_particles() {
-  // utils::print_one_line("Moving particles");
-}
-
 // Private Functions

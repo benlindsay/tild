@@ -5,10 +5,11 @@ Nx: [41, 41]
 rho_0: 10.0
 bond_length: 1.0
 monomer_size: 0.5
+timestep: 0.001
 sim_plan: single_sim
 sim_type: canonical
 output_dir: output
-max_iter: 10
+max_iter: 1000
 mesh_order: 2
 
 components:
@@ -21,16 +22,20 @@ components:
     vol_frac: 0.6
     n_segments_per_molecule: 20
 
+diffusion_coeffs:
+  A: 2.0
+  B: 3.0
+
 outputs:
   grid:
-    print_freq: 5
+    print_freq: 100
     column_width: 15
     write_header: false
     pm3d_compatible: true
   lammpstrj:
-    print_freq: 5
+    print_freq: 100
   summary:
     var_list: ["iter", "bond_energy", "nonbond_energy"]
-    print_freq: 2
+    print_freq: 100
     column_width: 15
     write_header: true

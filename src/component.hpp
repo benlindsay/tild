@@ -41,6 +41,7 @@ class Component {
                                 ArrayXXd &grid_weights);
   virtual void calculate_grid_densities();
   virtual double calculate_bond_forces_and_energy() = 0;
+  virtual void move_particles();
 
   Sim *sim;
   std::string name;  // Name of component
