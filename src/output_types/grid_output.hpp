@@ -25,6 +25,7 @@ class Grid_Output : public Output {
   void init(fs::path output_dir);
   void write_one_file(fs::path file_path, ArrayXd &data);
   void write_one_file(fs::path file_path, ArrayXcd &data);
+  void write_one_file(fs::path file_path, ArrayXXd &data);
   fs::path output_dir;
   int print_freq;
   int column_width;

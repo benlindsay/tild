@@ -106,6 +106,42 @@ void Grid_Output::write_one_file(fs::path file_path, ArrayXcd &data) {
   file.close();
 }
 
+void Grid_Output::write_one_file(fs::path file_path, ArrayXXd &data) {
+  int n_data_cols = data.cols();
+  file.open(file_path);
+  if (write_header && !pm3d_compatible) {
+    file << " " << std::setw(column_width - 1) << "x";
+    file << " " << std::setw(column_width - 1) << "y";
+    if (sim->dim == 3) {
+      file << " " << std::setw(column_width - 1) << "z";
+    }
+    for (int i = 0; i < n_data_cols; i++) {
+      file << " " << std::setw(column_width - 2) << "data_" << (i + 1);
+    }
+    file << "\n";
+  }
+  // Set number of digits after decimal point in scientific notation
+  // Assuming we want 1 space between fields, 2 characters go to "#.", and 4
+  // characters go to exponent, i.e. "e+00", string length - 7 gives the number
+  // of digits we can put after the decimal
+  file.precision(column_width - 7);
+  file << std::scientific;
+  for (int i = 0; i < sim->ML; i++) {
+    for (int d = 0; d < sim->dim; d++) {
+      file << " " << std::setw(column_width - 1)
+           << sim->local_grid_coords(i, d);
+    }
+    for (int d = 0; d < n_data_cols; d++) {
+      file << " " << std::setw(column_width - 1) << data(i, d);
+    }
+    file << "\n";
+    if (pm3d_compatible && (i + 1) % sim->Nx[0] == 0) {
+      file << "\n";
+    }
+  }
+  file.close();
+}
+
 void Grid_Output::write() {
   // Write center densities for each species of each component
   for (size_t i = 0; i < sim->component_list.size(); i++) {
@@ -164,6 +200,26 @@ void Grid_Output::write() {
         std::string file_name(file_name_ss.str());
         fs::path file_path = output_dir / file_name;
         write_one_file(file_path, sim->pair_potential_arrays[i][j]);
+      }
+    }
+
+    // Write pair potential gradients
+    for (int i = 0; i < Component::max_n_species; i++) {
+      for (int j = i; j < Component::max_n_species; j++) {
+        if (sim->pair_potential_gradient_arrays[i][j].size() == 0) {
+          continue;
+        }
+        std::ostringstream file_name_ss;
+        file_name_ss << "pair_potential_grad_" << char('a' + i) << "_"
+                     << char('a' + j);
+        if (NPROCS > 1) {
+          // Make the file name look like pair_potential_grad_a_a.04.dat
+          file_name_ss << "." << std::setw(2) << std::setfill('0') << RANK;
+        }
+        file_name_ss << ".dat";
+        std::string file_name(file_name_ss.str());
+        fs::path file_path = output_dir / file_name;
+        write_one_file(file_path, sim->pair_potential_gradient_arrays[i][j]);
       }
     }
   }

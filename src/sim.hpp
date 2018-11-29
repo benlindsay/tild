@@ -26,10 +26,11 @@
 
 class Output;
 
-using Eigen::ArrayXd;   // Dynamically sized double Array
-using Eigen::ArrayXcd;  // Dynamically sized double Array
-using Eigen::ArrayXi;   // Dynamically sized int Array
-using Eigen::ArrayXXi;  // Dynamically sized 2D int Array
+using Eigen::ArrayXd;    // Dynamically sized double Array
+using Eigen::ArrayXcd;   // Dynamically sized complex double Array
+using Eigen::ArrayXXcd;  // Dynamically sized 2D complex double Array
+using Eigen::ArrayXi;    // Dynamically sized int Array
+using Eigen::ArrayXXi;   // Dynamically sized 2D int Array
 
 // class FFTW_Utils;
 
@@ -53,7 +54,11 @@ class Sim {
   void init_fftw();
   void fftw_fwd(ArrayXd &in_array, ArrayXcd &out_array);
   void fftw_back(ArrayXcd &in_array, ArrayXd &out_array);
+  void fftw_back(std::complex<double> *in_array_ptr, double *out_array_ptr);
   void convolve(ArrayXd &array_1, ArrayXd &array_2, ArrayXd &convolved);
+  void calculate_gradients(ArrayXd &array, ArrayXXd &grad_arrays);
+  void calculate_gradients(ArrayXd &array, ArrayXXcd &grad_hat_arrays,
+                           ArrayXXd &grad_arrays);
 
   std::string description;
 
@@ -88,7 +93,7 @@ class Sim {
 
   std::vector<std::vector<ArrayXd> > pair_potential_arrays;
   std::vector<std::vector<ArrayXXd> > pair_potential_gradient_arrays;
-  std::vector<std::vector<ArrayXXd> > pair_potential_gradient_hat_arrays;
+  std::vector<std::vector<ArrayXXcd> > pair_potential_gradient_hat_arrays;
 
   // Energy variables
   double bond_energy;

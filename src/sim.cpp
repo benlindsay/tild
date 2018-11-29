@@ -225,6 +225,14 @@ void Sim::init_potentials() {
       Component::max_n_species,
       std::vector<ArrayXd>(Component::max_n_species, ArrayXd()));
 
+  pair_potential_gradient_arrays = std::vector<std::vector<ArrayXXd> >(
+      Component::max_n_species,
+      std::vector<ArrayXXd>(Component::max_n_species, ArrayXXd()));
+
+  pair_potential_gradient_hat_arrays = std::vector<std::vector<ArrayXXcd> >(
+      Component::max_n_species,
+      std::vector<ArrayXXcd>(Component::max_n_species, ArrayXXcd()));
+
   for (auto it_1 = conv_function_map.begin(); it_1 != conv_function_map.end();
        it_1++) {
     int species_int_i = static_cast<int>(it_1->first);
@@ -233,10 +241,20 @@ void Sim::init_potentials() {
       int species_int_j = static_cast<int>(it_2->first);
       ArrayXd conv_func_j = it_2->second;
       ArrayXd pair_potential = ArrayXd::Zero(ML);
+      ArrayXXd pair_potential_gradient = ArrayXXd::Zero(ML, dim);
+      ArrayXXcd pair_potential_gradient_hat = ArrayXXcd::Zero(ML, dim);
       convolve(conv_func_i, conv_func_j, pair_potential);
       // Add a factor of V which is necessary for future FFT operations
       pair_potential *= V;
+      calculate_gradients(pair_potential, pair_potential_gradient_hat,
+                          pair_potential_gradient);
+
+      // Store calculated arrays inside 2d vectors for later access
       pair_potential_arrays[species_int_i][species_int_j] = pair_potential;
+      pair_potential_gradient_hat_arrays[species_int_i][species_int_j] =
+          pair_potential_gradient_hat;
+      pair_potential_gradient_arrays[species_int_i][species_int_j] =
+          pair_potential_gradient;
     }
   }
 }
@@ -362,6 +380,17 @@ void Sim::fftw_back(ArrayXcd &in_array, ArrayXd &out_array) {
   }
 }
 
+void Sim::fftw_back(std::complex<double> *in_array_ptr, double *out_array_ptr) {
+  for (int i = 0; i < ML; i++) {
+    fftw_in_array[i][0] = in_array_ptr[i].real();
+    fftw_in_array[i][1] = in_array_ptr[i].imag();
+  }
+  fftw_execute(backward_plan);
+  for (int i = 0; i < ML; i++) {
+    out_array_ptr[i] = fftw_out_array[i][0];
+  }
+}
+
 void Sim::convolve(ArrayXd &array_1, ArrayXd &array_2, ArrayXd &convolved) {
   ArrayXcd array_1_hat(ML);
   ArrayXcd array_2_hat(ML);
@@ -370,4 +399,38 @@ void Sim::convolve(ArrayXd &array_1, ArrayXd &array_2, ArrayXd &convolved) {
   fftw_fwd(array_2, array_2_hat);
   convolved_hat = array_1_hat * array_2_hat * V;
   fftw_back(convolved_hat, convolved);
+}
+
+void Sim::calculate_gradients(ArrayXd &array, ArrayXXd &grad_arrays) {
+  ArrayXcd array_hat(ML);
+  fftw_fwd(array, array_hat);
+  ArrayXXcd grad_hat_arrays =
+      // I * local_grid_k_coords.colwise() *
+      local_grid_k_coords.cast<std::complex<double> >().colwise() * array_hat *
+      I;
+  std::complex<double> *grad_hat_arrays_ptr = grad_hat_arrays.data();
+  double *grad_arrays_ptr = grad_arrays.data();
+  for (int d = 0; d < dim; d++) {
+    // Do the backwards transformation one dimension at a time
+    std::complex<double> *in_array_ptr = grad_hat_arrays_ptr + d * ML;
+    double *out_array_ptr = grad_arrays_ptr + d * ML;
+    fftw_back(in_array_ptr, out_array_ptr);
+  }
+}
+
+void Sim::calculate_gradients(ArrayXd &array, ArrayXXcd &grad_hat_arrays,
+                              ArrayXXd &grad_arrays) {
+  ArrayXcd array_hat(ML);
+  fftw_fwd(array, array_hat);
+  grad_hat_arrays =
+      local_grid_k_coords.cast<std::complex<double> >().colwise() * array_hat *
+      I;
+  std::complex<double> *grad_hat_arrays_ptr = grad_hat_arrays.data();
+  double *grad_arrays_ptr = grad_arrays.data();
+  for (int d = 0; d < dim; d++) {
+    // Do the backwards transformation one dimension at a time
+    std::complex<double> *in_array_ptr = grad_hat_arrays_ptr + d * ML;
+    double *out_array_ptr = grad_arrays_ptr + d * ML;
+    fftw_back(in_array_ptr, out_array_ptr);
+  }
 }
