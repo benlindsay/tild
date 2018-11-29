@@ -43,7 +43,7 @@ Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
   //     sim->V / std::pow(2.0 * std::sqrt(PI) * sim->monomer_size, sim->dim);
   double monomer_size_squared = sim->monomer_size * sim->monomer_size;
   double prefactor =
-      std::pow(2.0 * PI * monomer_size_squared, double(sim->dim) / 2.0);
+      1.0 / std::pow(2.0 * PI * monomer_size_squared, double(sim->dim) / 2.0);
   ArrayXXd pbc_dist_from_origin = sim->local_grid_coords;
   for (int d = 0; d < sim->dim; d++) {
     for (int i = 0; i < sim->ML; i++) {
