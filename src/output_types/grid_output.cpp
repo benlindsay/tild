@@ -52,7 +52,7 @@ void Grid_Output::write_one_file(fs::path file_path, ArrayXd &data) {
     if (sim->dim == 3) {
       file << " " << std::setw(column_width - 1) << "z";
     }
-    file << " " << std::setw(column_width - 1) << "rho"
+    file << " " << std::setw(column_width - 1) << "data"
          << "\n";
   }
   // Set number of digits after decimal point in scientific notation
@@ -67,6 +67,38 @@ void Grid_Output::write_one_file(fs::path file_path, ArrayXd &data) {
            << sim->local_grid_coords(i, d);
     }
     file << " " << data[i] << "\n";
+    if (pm3d_compatible && (i + 1) % sim->Nx[0] == 0) {
+      file << "\n";
+    }
+  }
+  file.close();
+}
+
+void Grid_Output::write_one_file(fs::path file_path, ArrayXcd &data) {
+  file.open(file_path);
+  if (write_header && !pm3d_compatible) {
+    file << " " << std::setw(column_width - 1) << "x";
+    file << " " << std::setw(column_width - 1) << "y";
+    if (sim->dim == 3) {
+      file << " " << std::setw(column_width - 1) << "z";
+    }
+    file << " " << std::setw(column_width - 1) << "real";
+    file << " " << std::setw(column_width - 1) << "imag"
+         << "\n";
+  }
+  // Set number of digits after decimal point in scientific notation
+  // Assuming we want 1 space between fields, 2 characters go to "#.", and 4
+  // characters go to exponent, i.e. "e+00", string length - 7 gives the number
+  // of digits we can put after the decimal
+  file.precision(column_width - 7);
+  file << std::scientific;
+  for (int i = 0; i < sim->ML; i++) {
+    for (int d = 0; d < sim->dim; d++) {
+      file << " " << std::setw(column_width - 1)
+           << sim->local_grid_coords(i, d);
+    }
+    file << " " << data[i].real();
+    file << " " << data[i].imag() << "\n";
     if (pm3d_compatible && (i + 1) % sim->Nx[0] == 0) {
       file << "\n";
     }

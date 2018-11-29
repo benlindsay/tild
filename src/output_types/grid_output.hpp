@@ -7,6 +7,9 @@
 
 #include "../output.hpp"
 
+using Eigen::ArrayXd;
+using Eigen::ArrayXcd;
+
 class Grid_Output : public Output {
  public:
   Grid_Output(Sim *sim, fs::path output_dir, int print_freq, int column_width,
@@ -21,6 +24,7 @@ class Grid_Output : public Output {
             bool write_header, bool pm3d_compatible);
   void init(fs::path output_dir);
   void write_one_file(fs::path file_path, ArrayXd &data);
+  void write_one_file(fs::path file_path, ArrayXcd &data);
   fs::path output_dir;
   int print_freq;
   int column_width;
