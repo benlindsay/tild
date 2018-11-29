@@ -1,7 +1,7 @@
 dim: 2
 
-Lx: [21.0, 21.0]
-Nx: [21, 21]
+Lx: [10.25, 10.25]
+Nx: [41, 41]
 rho_0: 10.0
 bond_length: 1.0
 monomer_size: 0.5
