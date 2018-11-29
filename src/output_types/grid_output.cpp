@@ -108,7 +108,7 @@ void Grid_Output::write_one_file(fs::path file_path, ArrayXcd &data) {
 
 void Grid_Output::write() {
   // Write center densities for each species of each component
-  for (int i = 0; i < sim->component_list.size(); i++) {
+  for (size_t i = 0; i < sim->component_list.size(); i++) {
     Component *comp = sim->component_list[i];
     for (auto it = comp->rho_center_map.begin();
          it != comp->rho_center_map.end(); it++) {

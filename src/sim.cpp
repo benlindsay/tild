@@ -55,10 +55,10 @@ Sim::Sim(YAML::Node input) {
 }
 
 Sim::~Sim() {
-  for (int i = 0; i < output_list.size(); i++) {
+  for (size_t i = 0; i < output_list.size(); i++) {
     delete output_list[i];
   }
-  for (int i = 0; i < component_list.size(); i++) {
+  for (size_t i = 0; i < component_list.size(); i++) {
     delete component_list[i];
   }
 }

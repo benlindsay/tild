@@ -38,7 +38,7 @@ bool Lammpstrj_Output::is_time_to_write(void) {
 
 void Lammpstrj_Output::write() {
   int n_sites_total = 0;
-  for (int i = 0; i < component_list.size(); i++) {
+  for (size_t i = 0; i < component_list.size(); i++) {
     n_sites_total += component_list[i]->n_sites;
   }
 
@@ -59,7 +59,7 @@ void Lammpstrj_Output::write() {
     file << "ITEM: ATOMS id type mol x y z\n";
     int site_id_shift = 0;
     int mol_id_shift = 0;
-    for (int i_comp = 0; i_comp < component_list.size(); i_comp++) {
+    for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
       Component *comp = component_list[i_comp];
       for (int i_site = 0; i_site < comp->n_sites; i_site++) {
         file << i_site + site_id_shift << " ";
