@@ -236,7 +236,7 @@ void Sim::run() {
 }
 
 void Sim::calculate_grid_densities() {
-  for (int i_comp = 0; i_comp < component_list.size(); i_comp++) {
+  for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
     Component *comp = component_list[i_comp];
     for (auto it = comp->rho_center_map.begin();
          it != comp->rho_center_map.end(); it++) {
@@ -251,7 +251,7 @@ void Sim::calculate_grid_densities() {
 void Sim::calculate_forces() {
   bond_energy = 0.0;
   nonbond_energy = 0.0;
-  for (int i_comp = 0; i_comp < component_list.size(); i_comp++) {
+  for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
     Component *comp = component_list[i_comp];
     // Zero forces array
     comp->site_forces = ArrayXXd::Zero(comp->n_sites, dim);
