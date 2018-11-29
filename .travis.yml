@@ -34,6 +34,7 @@ before_install:
   - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-$GCC_V /usr/bin/gcc
   - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-$GCC_V /usr/bin/g++
   - echo $(g++ --version)
+  - sudo apt-get install libfftw3-dev
 script:
   - tools/install-clang-format.sh 4
   - tools/clang-format-diff.sh
