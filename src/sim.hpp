@@ -83,8 +83,8 @@ class Sim {
   // Potential variables
   std::vector<std::vector<ArrayXd> > pair_potential_arrays;
 
-  std::vector<Output*> output_list;
-  std::vector<Component*> component_list;
+  std::vector<Output *> output_list;
+  std::vector<Component *> component_list;
   std::vector<std::string> default_summary_var_list;
 
   // FFTW variables
