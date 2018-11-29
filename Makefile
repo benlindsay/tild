@@ -3,7 +3,7 @@ CC := g++
 # CC := mpic++
 CFLAGS := -std=c++11 -g -Wall
 # DFLAGS := -DMPI
-LIB := -L lib -lyaml-cpp -lboost_system -lboost_filesystem -lfftw3
+LIB := -L lib -lyaml-cpp -lboost_system -lboost_filesystem -lfftw3 -lprofiler
 INC := -I include
 TARGET := bin/drift
 

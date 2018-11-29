@@ -5,6 +5,7 @@
 #ifndef GLOBALS_HPP
 #define GLOBALS_HPP
 
+#include <gperftools/profiler.h>
 #include <boost/filesystem.hpp>  // boost::filesystem::path,canonical,absolute
 #include <complex>               // std::complex
 
