@@ -127,7 +127,8 @@ void Sim::init_box_vars(YAML::Node input) {
   V = Lx.prod();
   M = Nx.prod();
   grid_point_volume = dx.prod();  // Also = V / double(M)
-  ML = M;
+
+  init_fftw();
 
   local_grid_indices = ArrayXXi::Zero(ML, dim);
   int n_reps = 1;
@@ -242,4 +243,57 @@ int Sim::get_global_index(int ix_global, int iy_global) {
 
 int Sim::get_global_index(int ix_global, int iy_global, int iz_global) {
   return ix_global + Nx[0] * iy_global + Nx[0] * Nx[1] * iz_global;
+}
+
+void Sim::init_fftw() {
+  ArrayXi Nx_reverse = Nx.reverse();
+  int *Nx_reverse_ptr = Nx_reverse.data();
+
+  ML = M;
+
+  fftw_in_array = (fftw_complex *)fftw_malloc(ML * sizeof(fftw_complex));
+  fftw_out_array = (fftw_complex *)fftw_malloc(ML * sizeof(fftw_complex));
+
+  forward_plan = fftw_plan_dft(dim, Nx_reverse_ptr, fftw_in_array,
+                               fftw_out_array, FFTW_FORWARD, FFTW_MEASURE);
+  backward_plan = fftw_plan_dft(dim, Nx_reverse_ptr, fftw_in_array,
+                                fftw_out_array, FFTW_BACKWARD, FFTW_MEASURE);
+}
+
+void Sim::fftw_fwd(ArrayXd &in_array, ArrayXcd &out_array) {
+  double *in_array_ptr = in_array.data();
+  std::complex<double> *out_array_ptr = out_array.data();
+  for (int i = 0; i < ML; i++) {
+    fftw_in_array[i][0] = in_array_ptr[i];
+    fftw_in_array[i][1] = 0.0;
+  }
+  fftw_execute(forward_plan);
+  double norm = 1.0 / double(M);
+  for (int i = 0; i < ML; i++) {
+    out_array_ptr[i] =
+        std::complex<double>(fftw_out_array[i][0], fftw_out_array[i][1]) * norm;
+  }
+}
+
+void Sim::fftw_back(ArrayXcd &in_array, ArrayXd &out_array) {
+  std::complex<double> *in_array_ptr = in_array.data();
+  double *out_array_ptr = out_array.data();
+  for (int i = 0; i < ML; i++) {
+    fftw_in_array[i][0] = in_array_ptr[i].real();
+    fftw_in_array[i][1] = in_array_ptr[i].imag();
+  }
+  fftw_execute(backward_plan);
+  for (int i = 0; i < ML; i++) {
+    out_array_ptr[i] = fftw_out_array[i][0];
+  }
+}
+
+void Sim::convolve(ArrayXd &array_1, ArrayXd &array_2, ArrayXd &convolved) {
+  ArrayXcd array_1_hat(ML);
+  ArrayXcd array_2_hat(ML);
+  ArrayXcd convolved_hat(ML);
+  fftw_fwd(array_1, array_1_hat);
+  fftw_fwd(array_2, array_2_hat);
+  convolved_hat = array_1_hat * array_2_hat * V;
+  fftw_back(convolved_hat, convolved);
 }

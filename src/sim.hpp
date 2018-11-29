@@ -9,6 +9,12 @@
 #include <vector>  // std::vector
 #include "Eigen/Dense"
 #include "yaml-cpp/yaml.h"
+#ifdef MPI
+#include "fftw3-mpi.h"
+#include "mpi.h"
+#else
+#include "fftw3.h"
+#endif
 
 #include "component.hpp"
 #include "component_factory.hpp"
@@ -21,6 +27,7 @@
 class Output;
 
 using Eigen::ArrayXd;   // Dynamically sized double Array
+using Eigen::ArrayXcd;  // Dynamically sized double Array
 using Eigen::ArrayXi;   // Dynamically sized int Array
 using Eigen::ArrayXXi;  // Dynamically sized 2D int Array
 
@@ -41,6 +48,10 @@ class Sim {
   int get_global_index(int ix_global, int iy_global, int iz_global);
   void init_component_list(YAML::Node input);
   void write_outputs();
+  void init_fftw();
+  void fftw_fwd(ArrayXd &in_array, ArrayXcd &out_array);
+  void fftw_back(ArrayXcd &in_array, ArrayXd &out_array);
+  void convolve(ArrayXd &array_1, ArrayXd &array_2, ArrayXd &convolved);
 
   std::string description;
 
@@ -75,6 +86,12 @@ class Sim {
   std::vector<Output*> output_list;
   std::vector<Component*> component_list;
   std::vector<std::string> default_summary_var_list;
+
+  // FFTW variables
+  fftw_plan forward_plan;
+  fftw_plan backward_plan;
+  fftw_complex *fftw_in_array;
+  fftw_complex *fftw_out_array;
 
  private:
   void init_box_vars(YAML::Node input);
