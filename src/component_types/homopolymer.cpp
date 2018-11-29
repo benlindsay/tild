@@ -37,10 +37,6 @@ Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
   bool pbc_check = utils::check_pbc(site_coords, sim->Lx);
   std::cout << "PBC Check: " << pbc_check << std::endl;
 
-  conv_function_map[species] = ArrayXd::Zero(sim->ML);
-  // The factor of V below comes from the FFT
-  // double prefactor =
-  //     sim->V / std::pow(2.0 * std::sqrt(PI) * sim->monomer_size, sim->dim);
   double monomer_size_squared = sim->monomer_size * sim->monomer_size;
   double prefactor =
       1.0 / std::pow(2.0 * PI * monomer_size_squared, double(sim->dim) / 2.0);
@@ -55,7 +51,21 @@ Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
   }
   ArrayXd dist_from_origin_squared =
       pbc_dist_from_origin.square().rowwise().sum();
-  conv_function_map[species] =
-      prefactor *
-      Eigen::exp(-dist_from_origin_squared / (2.0 * monomer_size_squared));
+  ArrayXd conv_function = prefactor * Eigen::exp(-dist_from_origin_squared /
+                                                 (2.0 * monomer_size_squared));
+  if (sim->conv_function_map.count(species) > 0) {
+    if (conv_function.isApprox(sim->conv_function_map[species])) {
+      std::cout << "Species " << Component::species_enum_to_char(species)
+                << " conv_function matches one already seen. Good."
+                << std::endl;
+    } else {
+      std::ostringstream s;
+      s << "Species " << Component::species_enum_to_char(species)
+        << " conv_function doesn't match one already seen. "
+        << "Fix that or give it a new species type.";
+      utils::die(s.str());
+    }
+  } else {
+    sim->conv_function_map[species] = conv_function;
+  }
 }

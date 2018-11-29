@@ -81,6 +81,8 @@ class Sim {
   ArrayXXi weight_subgrid_index_shifts;
 
   // Potential variables
+  std::map<Component::Species_Type, ArrayXd> conv_function_map;
+
   std::vector<std::vector<ArrayXd> > pair_potential_arrays;
 
   std::vector<Output *> output_list;

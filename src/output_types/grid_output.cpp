@@ -107,9 +107,9 @@ void Grid_Output::write_one_file(fs::path file_path, ArrayXcd &data) {
 }
 
 void Grid_Output::write() {
+  // Write center densities for each species of each component
   for (int i = 0; i < sim->component_list.size(); i++) {
     Component *comp = sim->component_list[i];
-    // Write center densities for each species of each component
     for (auto it = comp->rho_center_map.begin();
          it != comp->rho_center_map.end(); it++) {
       Component::Species_Type species = it->first;
@@ -126,15 +126,17 @@ void Grid_Output::write() {
       fs::path file_path = output_dir / file_name;
       write_one_file(file_path, rho_center);
     }
+  }
 
-    // Write convolution (smearing) function for each species of each component
-    for (auto it = comp->conv_function_map.begin();
-         it != comp->conv_function_map.end(); it++) {
+  if (sim->iter == 0) {
+    // Write convolution (smearing) function for each species
+    for (auto it = sim->conv_function_map.begin();
+         it != sim->conv_function_map.end(); it++) {
       Component::Species_Type species = it->first;
       ArrayXd conv_function = it->second;
       char species_char = Component::species_enum_to_char(species);
       std::ostringstream file_name_ss;
-      file_name_ss << "conv_func_" << comp->name << "_" << species_char;
+      file_name_ss << "conv_func_" << species_char;
       if (NPROCS > 1) {
         // Make the file name look like conv_func_homopolymer_a_a.04.dat
         file_name_ss << "." << std::setw(2) << std::setfill('0') << RANK;
