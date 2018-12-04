@@ -60,6 +60,8 @@ class Sim {
   void calculate_gradients(ArrayXd &array, ArrayXXcd &grad_hat_arrays,
                            ArrayXXd &grad_arrays);
 
+  void get_spline_weights(ArrayXd &dx_from_nearest_grid_point,
+                          double *grid_weights);
   std::string description;
 
   // FFTW_Utils *fftw_utils;
@@ -71,6 +73,8 @@ class Sim {
   double rho_0;
   double bond_length;
   double monomer_size;
+  double kappa;
+  ArrayXXd chi;
 
   // Grid/box variables
   ArrayXd Lx;

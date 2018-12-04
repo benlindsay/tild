@@ -12,9 +12,16 @@
 
 class Sim;
 
+using Eigen::Array;
+using Eigen::Dynamic;
+using Eigen::RowMajor;
 using Eigen::ArrayXi;   // Dynamically sized integer Array
 using Eigen::ArrayXd;   // Dynamically sized double Array
 using Eigen::ArrayXXd;  // Dynamically sized 2D double Array
+typedef Array<double, Dynamic, Dynamic, RowMajor>
+    ArrayXXdR;  // Like ArrayXXd but with data contiguous along the rows
+typedef Array<int, Dynamic, Dynamic, RowMajor>
+    ArrayXXiR;  // Like ArrayXXi but with data contiguous along the rows
 
 class Component {
  public:
@@ -34,11 +41,10 @@ class Component {
   };
   static const int max_n_species =
       7;  // Should match number of letters in Species_Type enum above
+  void init_site_grid_vars();
   virtual void calculate_site_grid_weights(int i_site,
-                                           ArrayXi &subgrid_center_indices,
-                                           ArrayXXd &grid_weights);
-  virtual void add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
-                                ArrayXXd &grid_weights);
+                                           ArrayXi &subgrid_center_indices);
+  virtual void add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices);
   virtual void calculate_grid_densities();
   virtual double calculate_bond_forces_and_energy() = 0;
   virtual void move_particles();
@@ -64,6 +70,12 @@ class Component {
                          // subtract molecules
   ArrayXXd site_coords;  // Coordinates of sites
   ArrayXXd site_forces;  // Coordinates of sites
+  ArrayXXiR site_grid_indices;  // Element (i, j) contains global (i.e. [0, M) )
+                                // index of jth grid point near particle i
+  ArrayXXdR
+      site_grid_weights;  // Element (i, j) contains weight associated with
+                          // grid point whos element you see in
+                          // site_grid_indices(i, j)
 };
 
 #include "component_types/homopolymer.hpp"

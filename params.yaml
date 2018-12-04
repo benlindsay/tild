@@ -11,6 +11,9 @@ sim_type: canonical
 output_dir: output
 max_iter: 100
 mesh_order: 2
+kappa: 10.0
+chi:
+  AB: 2.5
 
 components:
   - type: homopolymer

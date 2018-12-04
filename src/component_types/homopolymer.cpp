@@ -68,6 +68,8 @@ Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
   } else {
     sim->conv_function_map[species] = conv_function;
   }
+
+  init_site_grid_vars();
 }
 
 double Homopolymer::calculate_bond_forces_and_energy() {

@@ -50,6 +50,30 @@ Sim::Sim(YAML::Node input) {
     timestep = input["timestep"].as<double>();
   }
 
+  // Initialize kappa
+  if (!input["kappa"]) {
+    kappa = -1.0;
+  } else {
+    kappa = input["kappa"].as<double>();
+  }
+
+  // Initialize chi
+  chi = ArrayXXd::Zero(Component::max_n_species, Component::max_n_species);
+  if (input["chi"]) {
+    for (YAML::const_iterator it = input["chi"].begin();
+         it != input["chi"].end(); it++) {
+      std::string species_pair = it->first.as<std::string>();
+      char species_1 = species_pair[0];
+      char species_2 = species_pair[1];
+      int species_1_int = int(species_1 - 'a');
+      int species_2_int = int(species_2 - 'a');
+      // Assign chi value to the right spot in the chi array
+      chi(species_1_int, species_2_int) = it->second.as<double>();
+    }
+  }
+  std::cout << "chi:" << std::endl;
+  std::cout << chi << std::endl;
+
   // Initialize box/grid variables
   init_box_vars(input);
 
@@ -293,6 +317,13 @@ void Sim::run() {
 }
 
 void Sim::calculate_grid_densities() {
+  // Zero the species density grids stored in species_density_map
+  for (auto it = species_density_map.begin(); it != species_density_map.end();
+       it++) {
+    // it->second points to the actual species density array, for example
+    // species_density_map[A]
+    it->second = ArrayXd::Zero(ML);
+  }
   for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
     Component *comp = component_list[i_comp];
     for (auto it = comp->rho_center_map.begin();
@@ -302,24 +333,75 @@ void Sim::calculate_grid_densities() {
       it->second = ArrayXd::Zero(ML);
     }
     comp->calculate_grid_densities();
+    for (auto it = comp->rho_center_map.begin();
+         it != comp->rho_center_map.end(); it++) {
+      Component::Species_Type species = it->first;
+      // it->second points to the actual rho_center density array, for example
+      // rho_center_map[A]
+      species_density_map[species] += it->second;
+    }
   }
 }
 
 void Sim::calculate_forces() {
   bond_energy = 0.0;
   nonbond_energy = 0.0;
+
+  // Bonded forces
   for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
     Component *comp = component_list[i_comp];
     // Zero forces array
     comp->site_forces = ArrayXXd::Zero(comp->n_sites, dim);
     bond_energy += comp->calculate_bond_forces_and_energy();
-    for (auto it = comp->rho_center_map.begin();
-         it != comp->rho_center_map.end(); it++) {
-      // it->second points to the actual rho_center density array, for example
-      // rho_center_map[A]
-      it->second = ArrayXd::Zero(ML);
+  }
+
+  // Fill fields in grad_field_map with species-species nonbonded interactions
+  ArrayXcd rho_hat(ML);
+  ArrayXXcd field_grad_prod_hat(ML, dim);
+  ArrayXXd field_grad_prod(ML, dim);
+  std::complex<double> *field_grad_prod_hat_ptr = field_grad_prod_hat.data();
+  double *field_grad_prod_ptr = field_grad_prod.data();
+  for (int i = 0; i < Component::max_n_species; i++) {
+    Component::Species_Type s_i = static_cast<Component::Species_Type>(i);
+    if (species_density_map[s_i].size() == 0) {
+      continue;
     }
-    comp->calculate_grid_densities();
+    fftw_fwd(species_density_map[s_i], rho_hat);
+    for (int j = 0; j < Component::max_n_species; j++) {
+      Component::Species_Type s_j = static_cast<Component::Species_Type>(j);
+      if (species_density_map[s_j].size() == 0) {
+        continue;
+      }
+      double factor = 0.0;
+      if (chi(i, j) != 0.0) {
+        factor += chi(i, j) / rho_0;
+      }
+      if (kappa > 0) {
+        factor += kappa / rho_0;
+      }
+      if (factor == 0.0) {
+        continue;
+      }
+      field_grad_prod_hat =
+          pair_potential_gradient_hat_arrays[i][j].colwise() * rho_hat;
+      for (int d = 0; d < dim; d++) {
+        fftw_back(field_grad_prod_hat_ptr + d * ML,
+                  field_grad_prod_ptr + d * ML);
+      }
+      // Species i acting on Species j
+      grad_field_map[s_j] += field_grad_prod * factor;
+    }
+  }
+
+  // Accumulate the nonbonded forces
+  for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
+    Component *comp = component_list[i_comp];
+    for (int i = 0; i < comp->n_sites; i++) {
+      // fill in
+      Component::Species_Type species =
+          static_cast<Component::Species_Type>(comp->site_types[i]);
+    }
+    nonbond_energy += comp->calculate_bond_forces_and_energy();
   }
 }
 
@@ -445,5 +527,93 @@ void Sim::calculate_gradients(ArrayXd &array, ArrayXXcd &grad_hat_arrays,
     std::complex<double> *in_array_ptr = grad_hat_arrays_ptr + d * ML;
     double *out_array_ptr = grad_arrays_ptr + d * ML;
     fftw_back(in_array_ptr, out_array_ptr);
+  }
+}
+
+void Sim::get_spline_weights(ArrayXd &dx_from_nearest_grid_point,
+                             double *grid_weights) {
+  ArrayXd dx_norm = dx_from_nearest_grid_point / dx;
+  double *dx_norm_ptr = dx_norm.data();
+
+  double scale = double(M) / V;
+  if (mesh_order == 0) {
+    // TODO: Is this true? Why the scale when grid weights sum to 1 along each
+    // dimension in all other cases?
+    grid_weights[0] = 1.0 * scale;
+  } else if (mesh_order == 1) {
+    for (int d = 0; d < dim; d++) {
+      int shift = d * (mesh_order + 1);
+      double *w = grid_weights + shift;
+      double d1 = dx_norm_ptr[d];
+      w[0] = (1 - 2 * d1) / 2.0;
+      w[1] = (1 + 2 * d1) / 2.0;
+    }
+  } else if (mesh_order == 2) {
+    for (int d = 0; d < dim; d++) {
+      int shift = d * (mesh_order + 1);
+      double *w = grid_weights + shift;
+      double d1 = dx_norm_ptr[d];
+      double d2 = d1 * d1;
+
+      w[0] = (1 - 4 * d1 + 4 * d2) / 8.0;
+      w[1] = (3 - 4 * d2) / 4.0;
+      w[2] = (1 + 4 * d1 + 4 * d2) / 8.0;
+    }
+  } else if (mesh_order == 3) {
+    for (int d = 0; d < dim; d++) {
+      int shift = d * (mesh_order + 1);
+      double *w = grid_weights + shift;
+      double d1 = dx_norm_ptr[d];
+      double d2 = d1 * d1;
+      double d3 = d2 * d1;
+
+      w[0] = (1 - 6 * d1 + 12 * d2 - 8 * d3) / 48.0;
+      w[1] = (23 - 30 * d1 - 12 * d2 + 24 * d3) / 48.0;
+      w[2] = (23 + 30 * d1 - 12 * d2 - 24 * d3) / 48.0;
+      w[3] = (1 + 6 * d1 + 12 * d2 + 8 * d3) / 48.0;
+    }
+  } else if (mesh_order == 4) {
+    for (int d = 0; d < dim; d++) {
+      int shift = d * (mesh_order + 1);
+      double *w = grid_weights + shift;
+      double d1 = dx_norm_ptr[d];
+      double d2 = d1 * d1;
+      double d3 = d2 * d1;
+      double d4 = d3 * d1;
+
+      w[0] = (1 - 8 * d1 + 24 * d2 - 32 * d3 + 16 * d4) / 384.0;
+      w[1] = (19 - 44 * d1 + 24 * d2 + 16 * d3 - 16 * d4) / 96.0;
+      w[2] = (115 - 120 * d2 + 48 * d4) / 192.0;
+      w[3] = (19 + 44 * d1 + 24 * d2 - 16 * d3 - 16 * d4) / 96.0;
+      w[4] = (1 + 8 * d1 + 24 * d2 + 32 * d3 + 16 * d4) / 384.0;
+    }
+  } else if (mesh_order == 5) {
+    for (int d = 0; d < dim; d++) {
+      int shift = d * (mesh_order + 1);
+      double *w = grid_weights + shift;
+      double d1 = dx_norm_ptr[d];
+      double d2 = d1 * d1;
+      double d3 = d2 * d1;
+      double d4 = d3 * d1;
+      double d5 = d4 * d1;
+
+      w[0] = (1 - 10 * d1 + 40 * d2 - 80 * d3 + 80 * d4 - 32 * d5) / 3840.0;
+      w[1] =
+          (237 - 750 * d1 + 840 * d2 - 240 * d3 - 240 * d4 + 160 * d5) / 3840.0;
+      w[2] =
+          (841 - 770 * d1 - 440 * d2 + 560 * d3 + 80 * d4 - 160 * d5) / 1920.0;
+      w[3] =
+          (841 + 770 * d1 - 440 * d2 - 560 * d3 + 80 * d4 + 160 * d5) / 1920.0;
+      w[4] = (237 + 750 * d1 + 840 * d2 + 2400 * d3 - 240 * d4 - 160 * d5) /
+             3840.0;
+      w[5] = (1 + 10 * d1 + 40 * d2 + 80 * d3 + 80 * d4 + 32 * d5) / 3840.0;
+    }
+  } else {
+    utils::die("get_spline_weights not set up for this interpolation order!\n");
+  }
+  for (int i_w = 0; i_w < dim * (mesh_order + 1); i_w++) {
+    if (grid_weights[i_w] < 0) {
+      utils::die("negative weights");
+    }
   }
 }
