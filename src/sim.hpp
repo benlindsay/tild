@@ -90,6 +90,8 @@ class Sim {
 
   // Potential variables
   std::map<Component::Species_Type, ArrayXd> conv_function_map;
+  std::map<Component::Species_Type, ArrayXd> species_density_map;
+  std::map<Component::Species_Type, ArrayXXcd> grad_field_map;
 
   std::vector<std::vector<ArrayXd> > pair_potential_arrays;
   std::vector<std::vector<ArrayXXd> > pair_potential_gradient_arrays;

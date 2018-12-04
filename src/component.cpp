@@ -97,6 +97,12 @@ void Component::add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
 }
 
 void Component::calculate_grid_densities() {
+  // Zero out rho_center fields
+  for (auto it = rho_center_map.begin(); it != rho_center_map.end(); it++) {
+    // it->second points to the actual rho_center density array, for example
+    // rho_center_map[A]
+    it->second = ArrayXd::Zero(sim->ML);
+  }
   ArrayXi subgrid_center_indices(sim->dim);
   ArrayXXd grid_weights(sim->dim, sim->mesh_order + 1);
   for (int i_site = 0; i_site < n_sites; i_site++) {

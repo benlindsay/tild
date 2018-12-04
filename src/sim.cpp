@@ -76,6 +76,13 @@ Sim::Sim(YAML::Node input) {
     }
   }
 
+  // Set species density grids to zeros
+  for (auto it = conv_function_map.begin(); it != conv_function_map.end();
+       it++) {
+    Component::Species_Type species = it->first;
+    species_density_map[species] = ArrayXd::Zero(ML);
+  }
+
   init_potentials();
 
   // Initialize forces
@@ -221,6 +228,12 @@ void Sim::init_component_list(YAML::Node input) {
 }
 
 void Sim::init_potentials() {
+  for (auto it = conv_function_map.begin(); it != conv_function_map.end();
+       it++) {
+    Component::Species_Type species = it->first;
+    grad_field_map[species] = ArrayXXcd::Zero(ML, dim);
+  }
+
   pair_potential_arrays = std::vector<std::vector<ArrayXd> >(
       Component::max_n_species,
       std::vector<ArrayXd>(Component::max_n_species, ArrayXd()));
