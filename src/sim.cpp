@@ -363,13 +363,13 @@ void Sim::calculate_forces() {
   double *field_grad_prod_ptr = field_grad_prod.data();
   for (int i = 0; i < Component::max_n_species; i++) {
     Component::Species_Type s_i = static_cast<Component::Species_Type>(i);
-    if (species_density_map[s_i].size() == 0) {
+    if (species_density_map.count(s_i) == 0) {
       continue;
     }
     fftw_fwd(species_density_map[s_i], rho_hat);
-    for (int j = 0; j < Component::max_n_species; j++) {
+    for (int j = i; j < Component::max_n_species; j++) {
       Component::Species_Type s_j = static_cast<Component::Species_Type>(j);
-      if (species_density_map[s_j].size() == 0) {
+      if (species_density_map.count(s_j) == 0) {
         continue;
       }
       double factor = 0.0;
