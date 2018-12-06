@@ -367,14 +367,16 @@ void Sim::calculate_forces() {
       continue;
     }
     fftw_fwd(species_density_map[s_i], rho_hat);
-    for (int j = i; j < Component::max_n_species; j++) {
+    for (int j = 0; j < Component::max_n_species; j++) {
       Component::Species_Type s_j = static_cast<Component::Species_Type>(j);
       if (species_density_map.count(s_j) == 0) {
         continue;
       }
+      int s_1 = std::min(i, j);
+      int s_2 = std::max(i, j);
       double factor = 0.0;
-      if (chi(i, j) != 0.0) {
-        factor += chi(i, j) / rho_0;
+      if (chi(s_1, s_2) != 0.0) {
+        factor += chi(s_1, s_2) / rho_0;
       }
       if (kappa > 0) {
         factor += kappa / rho_0;
@@ -383,7 +385,7 @@ void Sim::calculate_forces() {
         continue;
       }
       field_grad_prod_hat =
-          pair_potential_gradient_hat_arrays[i][j].colwise() * rho_hat;
+          pair_potential_gradient_hat_arrays[s_1][s_2].colwise() * rho_hat;
       for (int d = 0; d < dim; d++) {
         fftw_back(field_grad_prod_hat_ptr + d * ML,
                   field_grad_prod_ptr + d * ML);
