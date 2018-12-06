@@ -2,43 +2,43 @@ dim: 2
 
 Lx: [10.25, 10.25]
 Nx: [41, 41]
-rho_0: 10.0
+rho_0: 5.0
 bond_length: 1.0
 monomer_size: 0.5
 timestep: 0.001
 sim_plan: single_sim
 sim_type: canonical
 output_dir: output
-max_iter: 100
+max_iter: 500
 mesh_order: 2
-kappa: 10.0
+kappa: 5.0
 chi:
-  AB: 2.5
+  AB: 0.01
 
 components:
   - type: homopolymer
     species: A
-    vol_frac: 0.4
-    n_segments_per_molecule: 10
+    vol_frac: 0.5
+    n_segments_per_molecule: 5
   - type: homopolymer
     species: B
-    vol_frac: 0.6
-    n_segments_per_molecule: 20
+    vol_frac: 0.5
+    n_segments_per_molecule: 5
 
 diffusion_coeffs:
-  A: 2.0
-  B: 3.0
+  A: 1.0
+  B: 1.0
 
 outputs:
   grid:
-    print_freq: 100
+    print_freq: 10
     column_width: 15
     write_header: false
     pm3d_compatible: true
   lammpstrj:
-    print_freq: 100
+    print_freq: 5
   summary:
     var_list: ["iter", "bond_energy", "nonbond_energy"]
-    print_freq: 100
+    print_freq: 10
     column_width: 15
     write_header: true
