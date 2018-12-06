@@ -399,9 +399,20 @@ void Sim::calculate_forces() {
   for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
     Component *comp = component_list[i_comp];
     for (int i = 0; i < comp->n_sites; i++) {
-      // fill in
       Component::Species_Type species =
           static_cast<Component::Species_Type>(comp->site_types[i]);
+      for (int d = 0; d < dim; d++) {
+        for (int i_grid = 0; i_grid < n_subgrid_points; i_grid++) {
+          int grid_ind = comp->site_grid_indices(i, i_grid);
+          double grid_weight = comp->site_grid_weights(i, i_grid);
+          comp->site_forces(i, d) -=
+              grad_field_map[species](grid_ind, d) * grid_weight;
+          if (comp->site_forces(i, d) > 10000.0) {
+            std::cout << "force = " << comp->site_forces(i, d) << " > 100"
+                      << std::endl;
+          }
+        }
+      }
     }
     nonbond_energy += comp->calculate_bond_forces_and_energy();
   }
