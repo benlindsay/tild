@@ -42,9 +42,11 @@ class Component {
   static const int max_n_species =
       7;  // Should match number of letters in Species_Type enum above
   void init_site_grid_vars();
-  virtual void calculate_site_grid_weights(int i_site,
-                                           ArrayXi &subgrid_center_indices);
-  virtual void add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices);
+  virtual void calculate_axes_grid_weights(int i_site,
+                                           ArrayXi &subgrid_center_indices,
+                                           ArrayXXdR &axes_grid_weights);
+  virtual void add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
+                                ArrayXXdR &axes_grid_weights);
   virtual void calculate_grid_densities();
   virtual double calculate_bond_forces_and_energy() = 0;
   virtual void move_particles();

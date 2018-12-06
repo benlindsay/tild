@@ -11,8 +11,9 @@ void Component::init_site_grid_vars() {
   site_grid_weights = ArrayXXdR(n_sites, n_weights);
 }
 
-void Component::calculate_site_grid_weights(int i_site,
-                                            ArrayXi &subgrid_center_indices) {
+void Component::calculate_axes_grid_weights(int i_site,
+                                            ArrayXi &subgrid_center_indices,
+                                            ArrayXXdR &axes_grid_weights) {
   int mesh_order = sim->mesh_order;
   int dim = sim->dim;
   ArrayXd dx = sim->dx;
@@ -44,14 +45,21 @@ void Component::calculate_site_grid_weights(int i_site,
     // TODO: Ask about corresponsing code from original, why check for >=
     // Nx[j]? why use boundary grid point instead of 0 grid point?
   }
-  // grid_utils::get_spline_weights(dx_from_nearest_grid_point, grid_weights,
-  // sim);
-  double *grid_weights_i =
-      site_grid_weights.data() + i_site * sim->dim * (sim->mesh_order + 1);
-  sim->get_spline_weights(dx_from_nearest_grid_point, grid_weights_i);
+  double *axes_grid_weights_ptr = axes_grid_weights.data();
+  sim->get_spline_weights(dx_from_nearest_grid_point, axes_grid_weights_ptr);
+  for (int d = 0; d < sim->dim; d++) {
+    double sum = 0.0;
+    for (int i = 0; i < sim->mesh_order + 1; i++) {
+      sum += axes_grid_weights_ptr[d * (sim->mesh_order + 1) + i];
+    }
+    if (sum < 0.9999 || sum > 1.0001) {
+      utils::die(std::string() + "sum == " + std::to_string(sum) + " != 1");
+    }
+  }
 }
 
-void Component::add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices) {
+void Component::add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
+                                 ArrayXXdR &axes_grid_weights) {
   int left_shift = sim->mesh_order / 2 + sim->mesh_order % 2;
   ArrayXXi subgrid_indices = sim->weight_subgrid_index_shifts.rowwise() +
                              subgrid_center_indices.transpose() - left_shift;
@@ -74,25 +82,25 @@ void Component::add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices) {
     if (global_index < 0 || global_index >= sim->M) {
       utils::die("Bad index!");
     }
-
-    int *weight_subgrid_index_shifts_ptr =
-        sim->weight_subgrid_index_shifts.data();
     for (int d = 0; d < sim->dim; d++) {
-      xyz_shifts_ptr[d] =
-          weight_subgrid_index_shifts_ptr[d * sim->n_subgrid_points + i];
+      xyz_shifts_ptr[d] = sim->weight_subgrid_index_shifts(i, d);
     }
     // Calculate the weight to add to the grid
     double total_weight = 1.0;
-    double *grid_weights_i_site_ptr =
-        site_grid_weights.data() + i_site * sim->dim * (sim->mesh_order + 1);
     for (int d = 0; d < sim->dim; d++) {
-      total_weight *= grid_weights_i_site_ptr[d * (sim->mesh_order + 1) +
-                                              xyz_shifts_ptr[d]];
+      total_weight *= axes_grid_weights(d, xyz_shifts_ptr[d]);
+      if (total_weight > 1000) {
+        utils::die(std::string("total_weight = ") +
+                   std::to_string(total_weight) + " > 1000");
+      }
     }
     total_weight /= sim->grid_point_volume;
     // Actually add site to grid
     Species_Type species = static_cast<Species_Type>(site_types[i_site]);
     rho_center_map[species][global_index] += total_weight;
+
+    site_grid_indices(i_site, i) = global_index;
+    site_grid_weights(i_site, i) = total_weight;
   }
   delete[] xyz_shifts_ptr;
 }
@@ -105,11 +113,13 @@ void Component::calculate_grid_densities() {
     it->second = ArrayXd::Zero(sim->ML);
   }
   ArrayXi subgrid_center_indices(sim->dim);
+  ArrayXXdR axes_grid_weights(sim->dim, sim->mesh_order + 1);
   for (int i_site = 0; i_site < n_sites; i_site++) {
     // Fill grid_weights array so that grid_weights(i, j) contains the weight
     // for dimension i of parameter j, where 0 <= j <= mesh_order + 1
-    calculate_site_grid_weights(i_site, subgrid_center_indices);
-    add_site_to_grid(i_site, subgrid_center_indices);
+    calculate_axes_grid_weights(i_site, subgrid_center_indices,
+                                axes_grid_weights);
+    add_site_to_grid(i_site, subgrid_center_indices, axes_grid_weights);
   }
 }
 

@@ -531,7 +531,7 @@ void Sim::calculate_gradients(ArrayXd &array, ArrayXXcd &grad_hat_arrays,
 }
 
 void Sim::get_spline_weights(ArrayXd &dx_from_nearest_grid_point,
-                             double *grid_weights) {
+                             double *axes_grid_weights) {
   ArrayXd dx_norm = dx_from_nearest_grid_point / dx;
   double *dx_norm_ptr = dx_norm.data();
 
@@ -539,11 +539,11 @@ void Sim::get_spline_weights(ArrayXd &dx_from_nearest_grid_point,
   if (mesh_order == 0) {
     // TODO: Is this true? Why the scale when grid weights sum to 1 along each
     // dimension in all other cases?
-    grid_weights[0] = 1.0 * scale;
+    axes_grid_weights[0] = 1.0 * scale;
   } else if (mesh_order == 1) {
     for (int d = 0; d < dim; d++) {
       int shift = d * (mesh_order + 1);
-      double *w = grid_weights + shift;
+      double *w = axes_grid_weights + shift;
       double d1 = dx_norm_ptr[d];
       w[0] = (1 - 2 * d1) / 2.0;
       w[1] = (1 + 2 * d1) / 2.0;
@@ -551,7 +551,7 @@ void Sim::get_spline_weights(ArrayXd &dx_from_nearest_grid_point,
   } else if (mesh_order == 2) {
     for (int d = 0; d < dim; d++) {
       int shift = d * (mesh_order + 1);
-      double *w = grid_weights + shift;
+      double *w = axes_grid_weights + shift;
       double d1 = dx_norm_ptr[d];
       double d2 = d1 * d1;
 
@@ -562,7 +562,7 @@ void Sim::get_spline_weights(ArrayXd &dx_from_nearest_grid_point,
   } else if (mesh_order == 3) {
     for (int d = 0; d < dim; d++) {
       int shift = d * (mesh_order + 1);
-      double *w = grid_weights + shift;
+      double *w = axes_grid_weights + shift;
       double d1 = dx_norm_ptr[d];
       double d2 = d1 * d1;
       double d3 = d2 * d1;
@@ -575,7 +575,7 @@ void Sim::get_spline_weights(ArrayXd &dx_from_nearest_grid_point,
   } else if (mesh_order == 4) {
     for (int d = 0; d < dim; d++) {
       int shift = d * (mesh_order + 1);
-      double *w = grid_weights + shift;
+      double *w = axes_grid_weights + shift;
       double d1 = dx_norm_ptr[d];
       double d2 = d1 * d1;
       double d3 = d2 * d1;
@@ -590,7 +590,7 @@ void Sim::get_spline_weights(ArrayXd &dx_from_nearest_grid_point,
   } else if (mesh_order == 5) {
     for (int d = 0; d < dim; d++) {
       int shift = d * (mesh_order + 1);
-      double *w = grid_weights + shift;
+      double *w = axes_grid_weights + shift;
       double d1 = dx_norm_ptr[d];
       double d2 = d1 * d1;
       double d3 = d2 * d1;
@@ -612,7 +612,7 @@ void Sim::get_spline_weights(ArrayXd &dx_from_nearest_grid_point,
     utils::die("get_spline_weights not set up for this interpolation order!\n");
   }
   for (int i_w = 0; i_w < dim * (mesh_order + 1); i_w++) {
-    if (grid_weights[i_w] < 0) {
+    if (axes_grid_weights[i_w] < 0) {
       utils::die("negative weights");
     }
   }
