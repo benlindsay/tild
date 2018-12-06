@@ -5,7 +5,8 @@
 #include "component.hpp"
 
 void Component::init_site_grid_vars() {
-  int n_weights = int(std::pow(sim->mesh_order + 1, sim->dim));
+  int n_weights = sim->n_subgrid_points;
+  // int(std::pow(sim->mesh_order + 1, sim->dim));
   site_grid_indices = ArrayXXiR(n_sites, n_weights);
   site_grid_weights = ArrayXXdR(n_sites, n_weights);
 }
