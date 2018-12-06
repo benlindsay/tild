@@ -23,6 +23,7 @@ void Lammpstrj_Output::init(std::vector<Component *> _component_list,
   one_frame_per_file = _one_frame_per_file;
 
   file_path = _output_dir / (name + ".lammpstrj");
+  fs::create_directories(file_path.parent_path());
   file.open(file_path);
 }
 

@@ -26,6 +26,7 @@ void Grid_Output::init(fs::path _output_dir, int _print_freq, int _column_width,
     // No reason to put blank lines in the file for 3D data
     pm3d_compatible = false;
   }
+  fs::create_directories(output_dir);
 }
 
 void Grid_Output::init(fs::path output_dir) {
