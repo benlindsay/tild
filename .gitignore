@@ -3,7 +3,7 @@ build/
 html/
 include/yaml-cpp/
 include/boost/
-output/
+output*/
 lib/
 scratch/
 tmp/
