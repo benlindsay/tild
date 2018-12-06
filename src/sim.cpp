@@ -255,7 +255,7 @@ void Sim::init_potentials() {
   for (auto it = conv_function_map.begin(); it != conv_function_map.end();
        it++) {
     Component::Species_Type species = it->first;
-    grad_field_map[species] = ArrayXXcd::Zero(ML, dim);
+    grad_field_map[species] = ArrayXXd::Zero(ML, dim);
   }
 
   pair_potential_arrays = std::vector<std::vector<ArrayXd> >(
