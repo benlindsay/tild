@@ -52,12 +52,15 @@ void Lammpstrj_Output::write() {
     for (int d = 0; d < sim->dim; d++) {
       file << 0.0 << " " << sim->Lx[d] << "\n";
     }
-    // lammpstrj files need to be 3D so add a dummy 3rd dimension if simulation
-    // is in 2D
+    // lammpstrj files need to have 3 box bounds lines even if it is in 2D
     if (sim->dim == 2) {
-      file << 0.0 << " " << 1.0 << "\n";
+      file << 0.0 << " " << 0.0 << "\n";
     }
-    file << "ITEM: ATOMS id type mol x y z\n";
+    file << "ITEM: ATOMS id type mol x y";
+    if (sim->dim == 3) {
+      file << " z";
+    }
+    file << "\n";
     int site_id_shift = 0;
     int mol_id_shift = 0;
     for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
@@ -66,12 +69,7 @@ void Lammpstrj_Output::write() {
         file << i_site + site_id_shift << " ";
         file << comp->site_types[i_site] << " ";
         file << comp->molecule_ids[i_site] + mol_id_shift << " ";
-        file << comp->site_coords.row(i_site);
-        // Dummy 3rd dimension if simulation is 2D
-        if (sim->dim == 2) {
-          file << " 0.0";
-        }
-        file << "\n";
+        file << comp->site_coords.row(i_site) << "\n";
       }
       site_id_shift += comp->n_sites;
       mol_id_shift += comp->n_molecules;
