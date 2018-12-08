@@ -24,13 +24,16 @@ Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
   for (int i_mol = 0; i_mol < n_molecules; i_mol++) {
     int i_site_start = i_mol * n_segments_per_molecule;
     molecule_ids.segment(i_site_start, n_segments_per_molecule) = i_mol;
-    site_coords.row(i_site_start) =
-        (ArrayXXd::Random(1, sim->dim) + 1.0) * 0.5 * sim->Lx.transpose();
+    for (int d = 0; d < sim->dim; d++) {
+      site_coords(i_site_start, d) = sim->Lx[d] * sim->uniform_rand();
+    }
     for (int i_seg = 1; i_seg < n_segments_per_molecule; i_seg++) {
       int cur_site = i_site_start + i_seg;
       int prev_site = cur_site - 1;
-      site_coords.row(cur_site) =
-          site_coords.row(prev_site) + ArrayXXd::Random(1, sim->dim);
+      for (int d = 0; d < sim->dim; d++) {
+        site_coords(cur_site, d) =
+            site_coords(prev_site, d) + sim->bond_length * sim->gaussian_rand();
+      }
       utils::enforce_pbc(site_coords, sim->Lx, cur_site);
     }
   }

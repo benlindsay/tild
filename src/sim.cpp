@@ -74,6 +74,19 @@ Sim::Sim(YAML::Node input) {
   std::cout << "chi:" << std::endl;
   std::cout << chi << std::endl;
 
+  // Initialize random variables and objects
+  if (!input["random_seed"]) {
+    auto now = std::chrono::system_clock::now();
+    auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+    random_seed = now_ms.time_since_epoch().count();
+  } else {
+    random_seed = input["random_seed"].as<unsigned long>();
+  }
+  std::cout << "Random Seed: " << random_seed << std::endl;
+  random_generator.seed(random_seed);
+  uniform_dist = std::uniform_real_distribution<double>(0.0, 1.0);
+  gaussian_dist = std::normal_distribution<double>(0.0, 1.0);
+
   // Initialize box/grid variables
   init_box_vars(input);
 

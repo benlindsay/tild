@@ -5,6 +5,10 @@
 #ifndef SIM_HPP
 #define SIM_HPP
 
+#include <chrono>  // std::chrono
+#include <random>  // std::mt19937 (Mersenne Twister RNG),
+                   // std::uniform_real_distribution,
+                   // std::normal_distribution
 #include <string>  // std::string
 #include <vector>  // std::vector
 #include "Eigen/Dense"
@@ -62,6 +66,9 @@ class Sim {
 
   void get_spline_weights(ArrayXd &dx_from_nearest_grid_point,
                           double *grid_weights);
+  double uniform_rand() { return uniform_dist(random_generator); };
+  double gaussian_rand() { return gaussian_dist(random_generator); };
+
   std::string description;
 
   // FFTW_Utils *fftw_utils;
@@ -116,6 +123,12 @@ class Sim {
   fftw_plan backward_plan;
   fftw_complex *fftw_in_array;
   fftw_complex *fftw_out_array;
+
+  // Random variables and objects
+  unsigned long random_seed;
+  std::mt19937 random_generator;
+  std::uniform_real_distribution<double> uniform_dist;
+  std::normal_distribution<double> gaussian_dist;
 
  private:
   void init_box_vars(YAML::Node input);
