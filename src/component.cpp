@@ -124,11 +124,18 @@ void Component::calculate_grid_densities() {
 }
 
 void Component::move_particles() {
-  ArrayXd diffusion_coeffs(n_sites);
+  ArrayXd diff_dt(n_sites);
   for (int i = 0; i < n_sites; i++) {
     Species_Type species = static_cast<Species_Type>(site_types[i]);
-    diffusion_coeffs[i] = sim->diffusion_coeff_map[species];
+    diff_dt[i] = sim->diffusion_coeff_map[species];
   }
-  site_coords += site_forces.colwise() * diffusion_coeffs * sim->timestep;
+  diff_dt *= sim->timestep;
+  ArrayXXd random_array(n_sites, sim->dim);
+  double *random_array_ptr = random_array.data();
+  for (int i = 0; i < n_sites * sim->dim; i++) {
+    random_array_ptr[i] = sim->gaussian_rand();
+  }
+  site_coords += site_forces.colwise() * diff_dt +
+                 random_array.colwise() * (2.0 * diff_dt).sqrt();
   utils::enforce_pbc(site_coords, sim->Lx);
 }
