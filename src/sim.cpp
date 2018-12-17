@@ -427,7 +427,7 @@ void Sim::calculate_forces() {
         }
       }
     }
-    nonbond_energy += comp->calculate_bond_forces_and_energy();
+    // nonbond_energy += calculate_nonbond_energy();
   }
 }
 
