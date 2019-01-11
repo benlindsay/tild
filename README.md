@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/benlindsay/DRiFT.svg?branch=master)](https://travis-ci.org/benlindsay/DRiFT)
-# DRiFT
+[![Build Status](https://travis-ci.org/benlindsay/tild.svg?branch=master)](https://travis-ci.org/benlindsay/tild)
+# TILD
 
-## **D**ynamic **Ri**ggleman **F**ield **T**heory
+## Theoreticaly Informed Langevin Dynamics
