@@ -3,6 +3,7 @@ build/
 html/
 include/yaml-cpp/
 include/boost/
+input/
 output*/
 lib/
 scratch/
