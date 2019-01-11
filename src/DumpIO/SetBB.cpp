@@ -13,9 +13,9 @@ void DumpIO::SetBB(std::vector<std::vector<double> >& bb_t_) {
   set_bb = true;
 
   if (set_pos) {
-    if (d != bb_t_.size()) {
+    if (size_t(d) != bb_t_.size()) {
       std::cout << "ERROR: dimensions mismatch\n";
-      assert(d == bb_t_.size());
+      assert(size_t(d) == bb_t_.size());
     }
   } else {
     d = bb_t_.size();

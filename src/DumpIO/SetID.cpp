@@ -13,9 +13,9 @@ void DumpIO::SetID(std::vector<int>& id_t_) {
   set_id = true;
 
   if (set_pos) {
-    if (n_p != id_t_.size()) {
+    if (size_t(n_p) != id_t_.size()) {
       std::cout << "Number of particles mismatch!\n";
-      assert(n_p == id_t_.size());
+      assert(size_t(n_p) == id_t_.size());
     }
   } else {
     n_p = id_t_.size();

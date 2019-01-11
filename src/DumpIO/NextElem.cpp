@@ -32,14 +32,14 @@ int DumpIO::NextElem(const std::string& line, int start, std::string& elem) {
 
   // If not at end of string then get substring
   // between end and start
-  if (end != std::string::npos) {
+  if (size_t(end) != std::string::npos) {
     end += 1;
     elem = line.substr(start, end - start);
   } else {
     // If ended on a space, elem="";
     // else get substring from start to end of
     // line
-    if (start != line.length()) {
+    if (size_t(start) != line.length()) {
       elem = line.substr(start);
     } else {
       elem = "";

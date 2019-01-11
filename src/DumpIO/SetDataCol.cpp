@@ -10,9 +10,9 @@ void DumpIO::SetDataCol(std::string label, std::vector<double>& data_t_) {
   }
 
   if (set_pos) {
-    if (n_p != data_t_.size()) {
+    if (size_t(n_p) != data_t_.size()) {
       std::cout << "ERROR: dimensions mismatch";
-      assert(n_p == data_t_.size());
+      assert(size_t(n_p) == data_t_.size());
     }
   }
 

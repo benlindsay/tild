@@ -25,7 +25,7 @@ void DumpIO::WriteDataFileKA(std::string str_output,
   dim_name.push_back("x");
   dim_name.push_back("y");
   dim_name.push_back("z");
-  for (int dd = 0; dd < bb_t.size(); dd++) {
+  for (size_t dd = 0; dd < bb_t.size(); dd++) {
     write_data << bb_t[dd][0] << " ";
     write_data << bb_t[dd][1] << " ";
     write_data << dim_name[dd] << "lo ";
@@ -43,7 +43,7 @@ void DumpIO::WriteDataFileKA(std::string str_output,
 
   // Writes atomic positions
   write_data << "Atoms # atomic\n\n";
-  for (int p = 0; p < pos_t.size(); p++) {
+  for (size_t p = 0; p < pos_t.size(); p++) {
     write_data << id_t[p] << " ";
     write_data << (int)type_t[p] << " ";
     write_data << pos_t[p][0] << " ";
