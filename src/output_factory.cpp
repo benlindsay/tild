@@ -38,7 +38,7 @@ Output* Output_Factory::New_Output(Sim* sim, YAML::Node input,
     fs::path output_dir(input["output_dir"].as<std::string>());
     int print_freq = Output::default_print_freq;
     std::string name = "trajectory";
-    bool one_frame_per_file = true;
+    bool one_frame_per_file = false;
     bool dummy_box_bounds = true;
     for (YAML::const_iterator it = output_type_params.begin();
          it != output_type_params.end(); ++it) {
