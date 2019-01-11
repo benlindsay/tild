@@ -93,6 +93,11 @@ Sim::Sim(YAML::Node input) {
   // Initialize components
   init_component_list(input);
 
+  if (input["restart_file"]) {
+    fs::path restart_file_path(input["restart_file"].as<std::string>());
+    load_restart_file(restart_file_path);
+  }
+
   // Initialize diffusion coefficients
   if (input["diffusion_coeffs"]) {
     for (YAML::const_iterator it = input["diffusion_coeffs"].begin();
@@ -261,6 +266,54 @@ void Sim::init_component_list(YAML::Node input) {
     Component *comp =
         Component_Factory::New_Component(this, input, components[i]);
     component_list.push_back(comp);
+  }
+}
+
+void Sim::load_restart_file(fs::path restart_file_path) {
+  std::string extension = fs::extension(restart_file_path);
+  if (extension != ".lammpstrj") {
+    utils::die(std::string() + extension +
+               " not a recognized restart file type. Only .lammpstrj files "
+               "accepted for now.");
+  }
+  if (!fs::exists(restart_file_path)) {
+    utils::die(std::string("Can't find ") + restart_file_path.string() + "!");
+  }
+  DumpIO dump_in = DumpIO();
+  std::ifstream restart_file(restart_file_path.string());
+  dump_in.OpenI(restart_file);
+  size_t n_frames = dump_in.NumFrames(restart_file);
+  for (size_t i = 0; i < n_frames; i++) {
+    dump_in.LoadNextFrame(restart_file);
+  }
+  std::vector<std::vector<double> > positions;
+  dump_in.GetPos(positions);
+  size_t n_sites = 0;
+  for (size_t i = 0; i < component_list.size(); i++) {
+    n_sites += component_list[i]->n_sites;
+  }
+  assert(n_sites == positions.size());
+  std::vector<int> mols;
+  dump_in.GetDataCol("mol", mols);
+  std::vector<int> types;
+  dump_in.GetDataCol("type", types);
+  size_t prev_comp_sites = 0;
+  size_t prev_comp_molecules = 0;
+  for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
+    Component *comp = component_list[i_comp];
+    for (int i_site = 0; i_site < component_list[i_comp]->n_sites; i_site++) {
+      int next_site = prev_comp_sites + i_site;
+      int i_mol = comp->get_mol_id(i_site) + prev_comp_molecules;
+      // Make sure site id and molecule id match what's expected based on yaml
+      // input file
+      assert(comp->site_types[i_site] == types[next_site]);
+      assert(i_mol == mols[next_site]);
+      for (int d = 0; d < dim; d++) {
+        comp->site_coords(i_site, d) = positions[next_site][d];
+      }
+    }
+    prev_comp_sites += comp->n_sites;
+    prev_comp_molecules += comp->n_molecules;
   }
 }
 

@@ -14,6 +14,7 @@ mesh_order: 2
 kappa: 50.0
 chi:
   AB: 0.01
+restart_file: input/trajectory.lammpstrj
 # random_seed: 1544286846034
 
 components:
@@ -38,6 +39,7 @@ outputs:
     pm3d_compatible: true
   lammpstrj:
     print_freq: 20
+    dummy_box_bounds: false
   summary:
     var_list: ["iter", "bond_energy", "nonbond_energy"]
     print_freq: 10

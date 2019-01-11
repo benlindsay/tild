@@ -39,6 +39,7 @@ Output* Output_Factory::New_Output(Sim* sim, YAML::Node input,
     int print_freq = Output::default_print_freq;
     std::string name = "trajectory";
     bool one_frame_per_file = true;
+    bool dummy_box_bounds = true;
     for (YAML::const_iterator it = output_type_params.begin();
          it != output_type_params.end(); ++it) {
       std::string key = it->first.as<std::string>();
@@ -49,13 +50,16 @@ Output* Output_Factory::New_Output(Sim* sim, YAML::Node input,
         print_freq = value.as<int>();
       } else if (key == "one_frame_per_file") {
         one_frame_per_file = value.as<bool>();
+      } else if (key == "dummy_box_bounds") {
+        dummy_box_bounds = value.as<bool>();
       } else {
         utils::die("Can't recognize lammpstrj output parameter '" +
                    value.as<std::string>() + "'");
       }
     }
     return new Lammpstrj_Output(sim, sim->component_list, output_dir,
-                                print_freq, name, one_frame_per_file);
+                                print_freq, name, one_frame_per_file,
+                                dummy_box_bounds);
   } else if (output_type == "summary") {
     std::vector<std::string> var_list = sim->default_summary_var_list;
     int print_freq = Output::default_print_freq;

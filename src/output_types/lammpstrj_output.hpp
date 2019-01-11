@@ -11,7 +11,7 @@ class Lammpstrj_Output : public Output {
  public:
   Lammpstrj_Output(Sim *sim, std::vector<Component *> component_list,
                    fs::path output_dir, int print_freq, std::string name,
-                   bool one_frame_per_file);
+                   bool one_frame_per_file, bool dummy_box_bounds);
   virtual ~Lammpstrj_Output();
   virtual bool is_time_to_write();
   virtual void write();
@@ -19,12 +19,14 @@ class Lammpstrj_Output : public Output {
 
  private:
   void init(std::vector<Component *> component_list, fs::path output_dir,
-            int print_freq, std::string name, bool one_frame_per_file);
+            int print_freq, std::string name, bool one_frame_per_file,
+            bool dummy_box_bounds);
   void write_one_frame();
   std::vector<Component *> component_list;
   int print_freq;
   std::string name;
   bool one_frame_per_file;
+  bool dummy_box_bounds;
   fs::path file_path;
   fs::ofstream file;
 };

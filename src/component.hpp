@@ -5,6 +5,7 @@
 #ifndef COMPONENT_HPP
 #define COMPONENT_HPP
 
+#include <cassert>
 #include <map>
 #include "Eigen/Dense"
 #include "globals.hpp"
@@ -49,6 +50,7 @@ class Component {
                                 ArrayXXdR &axes_grid_weights);
   virtual void calculate_grid_densities();
   virtual double calculate_bond_forces_and_energy() = 0;
+  virtual int get_mol_id(int site_id) = 0;
   virtual void move_particles();
 
   Sim *sim;

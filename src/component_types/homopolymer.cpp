@@ -90,3 +90,8 @@ double Homopolymer::calculate_bond_forces_and_energy() {
   }
   return bond_energy;
 }
+
+int Homopolymer::get_mol_id(int site_id) {
+  assert(n_segments_per_molecule > 0);
+  return site_id / n_segments_per_molecule;
+}

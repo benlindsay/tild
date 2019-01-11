@@ -5,12 +5,13 @@
 #ifndef SIM_HPP
 #define SIM_HPP
 
-#include <chrono>  // std::chrono
-#include <random>  // std::mt19937 (Mersenne Twister RNG),
-                   // std::uniform_real_distribution,
-                   // std::normal_distribution
-#include <string>  // std::string
-#include <vector>  // std::vector
+#include <cassert>  // std::assert
+#include <chrono>   // std::chrono
+#include <random>   // std::mt19937 (Mersenne Twister RNG),
+                    // std::uniform_real_distribution,
+                    // std::normal_distribution
+#include <string>   // std::string
+#include <vector>   // std::vector
 #include "Eigen/Dense"
 #include "yaml-cpp/yaml.h"
 #ifdef MPI
@@ -20,6 +21,7 @@
 #include "fftw3.h"
 #endif
 
+#include "DumpIO/DumpIO.hpp"
 #include "component.hpp"
 #include "component_factory.hpp"
 #include "globals.hpp"
@@ -53,6 +55,7 @@ class Sim {
   int get_global_index(int ix_global, int iy_global, int iz_global);
   ArrayXd pbc_r2_minus_r1(ArrayXd r1, ArrayXd r2);
   void init_component_list(YAML::Node input);
+  void load_restart_file(fs::path restart_file_path);
   void init_potentials();
   void write_outputs();
   void init_fftw();
