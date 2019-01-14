@@ -6,6 +6,7 @@
 #define COMPONENT_HPP
 
 #include <cassert>
+#include <fstream>
 #include <map>
 #include "Eigen/Dense"
 #include "globals.hpp"

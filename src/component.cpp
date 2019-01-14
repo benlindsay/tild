@@ -124,6 +124,11 @@ void Component::calculate_grid_densities() {
 }
 
 void Component::move_particles() {
+  std::ofstream movements;
+  if (sim->iter == sim->debug_print_iter) {
+    movements.open("output/movements.dat",
+                   std::ofstream::out | std::ofstream::app);
+  }
   ArrayXd diff_dt(n_sites);
   for (int i = 0; i < n_sites; i++) {
     Species_Type species = static_cast<Species_Type>(site_types[i]);
@@ -135,7 +140,32 @@ void Component::move_particles() {
   for (int i = 0; i < n_sites * sim->dim; i++) {
     random_array_ptr[i] = sim->gaussian_rand();
   }
+  if (site_types[0] == Component::A) {
+    double x_tmp = site_coords(0, 0);
+    double f_tmp = site_forces(0, 0);
+    double r = random_array(0, 0);
+    int a = 42;
+  }
   site_coords += site_forces.colwise() * diff_dt +
                  random_array.colwise() * (2.0 * diff_dt).sqrt();
+  if (site_types[0] == Component::A) {
+    double x_tmp = site_coords(0, 0);
+    int a = 42;
+  }
+  if (sim->iter == sim->debug_print_iter) {
+    for (int i = 0; i < n_sites; i++) {
+      for (int d = 0; d < sim->dim; d++) {
+        movements << i << " " << d << " " << diff_dt[i] << " "
+                  << site_forces(i, d) << " " << std::sqrt(2.0 * diff_dt[i])
+                  << " " << random_array(i, d) << " "
+                  << site_forces(i, d) * diff_dt[i] +
+                         std::sqrt(2.0 * diff_dt[i]) * random_array(i, d)
+                  << std::endl;
+      }
+    }
+  }
   utils::enforce_pbc(site_coords, sim->Lx);
+  if (sim->iter == sim->debug_print_iter) {
+    movements.close();
+  }
 }

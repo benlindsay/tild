@@ -133,6 +133,8 @@ class Sim {
   std::uniform_real_distribution<double> uniform_dist;
   std::normal_distribution<double> gaussian_dist;
 
+  int debug_print_iter;
+
  private:
   void init_box_vars(YAML::Node input);
 };

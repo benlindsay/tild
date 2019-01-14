@@ -14,6 +14,7 @@ Sim::Sim(YAML::Node input) {
   }
 
   iter = 0;
+  debug_print_iter = 2;
 
   // Initialize max_iter
   if (!input["max_iter"]) {
@@ -412,6 +413,12 @@ void Sim::calculate_grid_densities() {
 void Sim::calculate_forces() {
   bond_energy = 0.0;
   nonbond_energy = 0.0;
+  std::ofstream chi_file;
+  if (iter == debug_print_iter) {
+    fs::create_directories("output");
+    chi_file.open("output/chi.dat");
+    chi_file << "gind dim ug_c_rho chi rho0 variable value" << std::endl;
+  }
 
   // Bonded forces
   for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
@@ -457,11 +464,46 @@ void Sim::calculate_forces() {
                   field_grad_prod_ptr + d * ML);
       }
       // Species i acting on Species j
+      if (i == 0 && j == 1) {
+        double fac_tmp = factor;
+        double gfm_tmp = grad_field_map[s_j](0, 0);
+        double fgp_tmp = field_grad_prod(0, 0);
+        int a = 42;
+      }
       grad_field_map[s_j] += field_grad_prod * factor;
+      if (i == 0 && j == 1) {
+        double fac_tmp = factor;
+        double gfm_tmp = grad_field_map[s_j](0, 0);
+        double fgp_tmp = field_grad_prod(0, 0);
+        int a = 42;
+      }
+      if (iter == debug_print_iter && s_i != s_j) {
+        std::string variable;
+        if (s_j == 0) {
+          variable = "gradwA";
+        } else {
+          variable = "gradwB";
+        }
+        for (int ig = 0; ig < ML; ig++) {
+          for (int d = 0; d < dim; d++) {
+            chi_file << ig << " " << d << " " << field_grad_prod(ig, d) << " "
+                     << chi(s_1, s_2) << " " << rho_0 << " " << variable << " "
+                     << field_grad_prod(ig, d) * chi(s_1, s_2) / rho_0
+                     << std::endl;
+          }
+        }
+      }
     }
   }
 
   // Accumulate the nonbonded forces
+  fs::ofstream forces_file;
+  if (iter == debug_print_iter) {
+    forces_file.open("output/forces.dat");
+    forces_file << "id m dim gind variable value weight rho_opp grad_uG_hat uG"
+                << std::endl;
+  }
+  int i_site_start = 0;
   for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
     Component *comp = component_list[i_comp];
     for (int i = 0; i < comp->n_sites; i++) {
@@ -471,8 +513,40 @@ void Sim::calculate_forces() {
         for (int i_grid = 0; i_grid < n_subgrid_points; i_grid++) {
           int grid_ind = comp->site_grid_indices(i, i_grid);
           double grid_weight = comp->site_grid_weights(i, i_grid);
-          comp->site_forces(i, d) -=
-              grad_field_map[species](grid_ind, d) * grid_weight;
+          double x_tmp = comp->site_coords(i, d);
+          double f_tmp = comp->site_forces(i, d);
+          if (i_comp == 0 && i == 0 && d == 0 && i_grid == 0) {
+            double df_tmp = -grad_field_map[species](grid_ind, d) *
+                            grid_weight * grid_point_volume;
+            double a = 42;
+          }
+          double gmap_tmp = grad_field_map[species](grid_ind, d);
+          f_tmp = comp->site_forces(i, d);
+          if (i_comp == 0 && i == 0 && d == 0) {
+            std::cout << "Grid force (0, 0): i_grid = " << i_grid << " force = "
+                      << -grad_field_map[species](grid_ind, d) * grid_weight *
+                             grid_point_volume
+                      << std::endl;
+          }
+          std::string variable;
+          double grad_uG_hat =
+              pair_potential_gradient_hat_arrays[0][1](grid_ind, d).imag();
+          double uG = pair_potential_arrays[0][1][grid_ind];
+          double rho_opp;
+          if (species == Component::A) {
+            variable = "gradwA";
+            rho_opp = species_density_map[Component::B](grid_ind);
+          } else if (species == Component::B) {
+            variable = "gradwB";
+            rho_opp = species_density_map[Component::A](grid_ind);
+          }
+          if (iter == debug_print_iter) {
+            forces_file << i_site_start + i << " " << i_grid << " " << d << " "
+                        << grid_ind << " " << variable << " "
+                        << grad_field_map[species](grid_ind, d) << " "
+                        << grid_weight << " " << rho_opp << " " << grad_uG_hat
+                        << " " << uG << std::endl;
+          }
           if (comp->site_forces(i, d) > 10000.0) {
             std::cout << "force = " << comp->site_forces(i, d) << " > 100"
                       << std::endl;
@@ -481,10 +555,22 @@ void Sim::calculate_forces() {
       }
     }
     // nonbond_energy += calculate_nonbond_energy();
+    i_site_start += comp->n_sites;
+  }
+  if (iter == debug_print_iter) {
+    forces_file.close();
+    chi_file.close();
   }
 }
 
 void Sim::move_particles() {
+  fs::ofstream movements;
+  fs::create_directories("output");
+  if (iter == debug_print_iter) {
+    movements.open("output/movements.dat");
+    movements << "id dim dsq f rand_pref rand movement" << std::endl;
+    movements.close();
+  }
   for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
     Component *comp = component_list[i_comp];
     comp->move_particles();

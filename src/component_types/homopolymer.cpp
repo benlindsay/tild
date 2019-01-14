@@ -76,6 +76,18 @@ Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
 }
 
 double Homopolymer::calculate_bond_forces_and_energy() {
+  std::ofstream bonds_file;
+  if (sim->iter == sim->debug_print_iter) {
+    fs::create_directories("output");
+    std::ios_base::openmode mode = std::ofstream::out;
+    if (species == Component::B) {
+      mode = mode | std::ofstream::app;
+    }
+    bonds_file.open("output/bonds.dat", mode);
+    if (species == Component::A) {
+      bonds_file << "id dim bonded_id r2_minus_r1 f" << std::endl;
+    }
+  }
   double bond_energy = 0.0;
   for (int i_mol = 0; i_mol < n_molecules; i_mol++) {
     for (int i_seg = 0; i_seg < n_segments_per_molecule - 1; i_seg++) {
@@ -86,7 +98,21 @@ double Homopolymer::calculate_bond_forces_and_energy() {
       bond_energy += 1.5 * dr.square().sum();
       site_forces.row(site_1) += 3.0 * dr;
       site_forces.row(site_2) -= 3.0 * dr;
+      if (sim->iter == sim->debug_print_iter) {
+        for (int d = 0; d < sim->dim; d++) {
+          bonds_file << site_1 << " " << d << " " << site_2 << " " << dr[d]
+                     << " " << 3.0 * dr[d] << std::endl;
+          bonds_file << site_2 << " " << d << " " << site_1 << " " << dr[d]
+                     << " " << -3.0 * dr[d] << std::endl;
+        }
+      }
     }
+  }
+  if (sim->iter == sim->debug_print_iter) {
+    std::cout << "Bond force (0, 0): " << site_forces(0, 0) << std::endl;
+  }
+  if (sim->iter == sim->debug_print_iter) {
+    bonds_file.close();
   }
   return bond_energy;
 }

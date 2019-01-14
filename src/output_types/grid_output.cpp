@@ -165,7 +165,7 @@ void Grid_Output::write() {
     }
   }
 
-  if (sim->iter == 0) {
+  if (sim->iter == sim->debug_print_iter) {
     // Write convolution (smearing) function for each species
     for (auto it = sim->conv_function_map.begin();
          it != sim->conv_function_map.end(); it++) {
@@ -223,5 +223,15 @@ void Grid_Output::write() {
         write_one_file(file_path, sim->pair_potential_gradient_arrays[i][j]);
       }
     }
+  }
+
+  // Write the field_grad_prod variables
+  for (auto it = sim->grad_field_map.begin(); it != sim->grad_field_map.end();
+       it++) {
+    Component::Species_Type s = it->first;
+    char c = Component::species_enum_to_char(s);
+    std::string file_name = std::string("grad_field_") + c + ".dat";
+    fs::path file_path = output_dir / file_name;
+    write_one_file(file_path, it->second);
   }
 }
