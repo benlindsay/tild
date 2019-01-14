@@ -520,6 +520,8 @@ void Sim::calculate_forces() {
                             grid_weight * grid_point_volume;
             double a = 42;
           }
+          comp->site_forces(i, d) -= grad_field_map[species](grid_ind, d) *
+                                     grid_weight * grid_point_volume;
           double gmap_tmp = grad_field_map[species](grid_ind, d);
           f_tmp = comp->site_forces(i, d);
           if (i_comp == 0 && i == 0 && d == 0) {
