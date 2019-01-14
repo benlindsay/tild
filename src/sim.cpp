@@ -429,6 +429,12 @@ void Sim::calculate_forces() {
     bond_energy += comp->calculate_bond_forces_and_energy();
   }
 
+  for (auto it = conv_function_map.begin(); it != conv_function_map.end();
+       it++) {
+    Component::Species_Type species = it->first;
+    grad_field_map[species] = ArrayXXd::Zero(ML, dim);
+  }
+
   // Fill fields in grad_field_map with species-species nonbonded interactions
   ArrayXcd rho_hat(ML);
   ArrayXXcd field_grad_prod_hat(ML, dim);
