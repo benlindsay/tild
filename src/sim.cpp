@@ -296,6 +296,14 @@ void Sim::load_restart_file(fs::path restart_file_path) {
   assert(n_sites == positions.size());
   std::vector<int> mols;
   dump_in.GetDataCol("mol", mols);
+  // If mol indexing in restart file starts with something other than 0, shift
+  // the mol values to start with 0
+  int mol_index_shift = mols[0];
+  if (mol_index_shift != 0) {
+    for (size_t i = 0; i < mols.size(); i++) {
+      mols[i] -= mol_index_shift;
+    }
+  }
   std::vector<int> types;
   dump_in.GetDataCol("type", types);
   size_t prev_comp_sites = 0;
