@@ -164,6 +164,13 @@ void Sim::init_box_vars(YAML::Node input) {
       }
       for (std::size_t i = 0; i < size_t(dim); i++) {
         Nx[i] = input["nx"][i].as<int>();
+        if (Nx[i] % 2 == 0) {
+          std::stringstream ss;
+          ss << "Nx[" << i << "] was " << Nx[i] << " which is even. "
+             << "Adding 1 to make it odd." << std::endl;
+          utils::print_one_line(ss);
+          Nx[i] += 1;
+        }
       }
       keys.erase("nx");
     } else if (it->first.as<std::string>() == "dx") {
