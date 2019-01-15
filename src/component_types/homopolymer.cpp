@@ -5,15 +5,15 @@
 #include "homopolymer.hpp"
 
 Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
-                         Component::Species_Type species)
+                         int species)
     : Component(sim, vol_frac),
       species(species),
       n_segments_per_molecule(n_segments_per_molecule) {
-  name = std::string("homopolyer_") + Component::species_enum_to_char(species);
+  name = std::string("homopolyer_") + Component::species_int_to_char(species);
   utils::print_one_line("Initializing Component " + name);
 
-  // Initialize center density array for specified species to array or zeros
-  rho_center_map[species] = ArrayXd::Zero(sim->ML);
+  species_list.push_back(species);
+  rho_center_list = std::vector<ArrayXd>(species + 1, ArrayXd::Zero(0));
 
   n_molecules =
       int(sim->rho_0 * sim->V * vol_frac / n_segments_per_molecule + 0.5);
@@ -56,20 +56,20 @@ Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
       pbc_dist_from_origin.square().rowwise().sum();
   ArrayXd conv_function = prefactor * Eigen::exp(-dist_from_origin_squared /
                                                  (2.0 * monomer_size_squared));
-  if (sim->conv_function_map.count(species) > 0) {
-    if (conv_function.isApprox(sim->conv_function_map[species])) {
-      std::cout << "Species " << Component::species_enum_to_char(species)
+  if (sim->conv_function_list[species].size() > 0) {
+    if (conv_function.isApprox(sim->conv_function_list[species])) {
+      std::cout << "Species " << Component::species_int_to_char(species)
                 << " conv_function matches one already seen. Good."
                 << std::endl;
     } else {
       std::ostringstream s;
-      s << "Species " << Component::species_enum_to_char(species)
+      s << "Species " << Component::species_int_to_char(species)
         << " conv_function doesn't match one already seen. "
         << "Fix that or give it a new species type.";
       utils::die(s.str());
     }
   } else {
-    sim->conv_function_map[species] = conv_function;
+    sim->conv_function_list[species] = conv_function;
   }
 
   init_site_grid_vars();

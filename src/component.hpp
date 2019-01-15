@@ -6,7 +6,6 @@
 #define COMPONENT_HPP
 
 #include <cassert>
-#include <map>
 #include "Eigen/Dense"
 #include "globals.hpp"
 #include "utils.hpp"
@@ -28,20 +27,23 @@ class Component {
  public:
   Component(Sim *sim, double vol_frac) : sim(sim), vol_frac(vol_frac){};
   virtual ~Component(){};
-  enum Species_Type { A, B, C, D, E, F, G };
-  static char species_enum_to_char(Species_Type s) {
-    const char Species_Char[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g'};
-    return Species_Char[s];
-  };
-  static Species_Type species_char_to_enum(char c) {
-    if (int(c) < int('a') || int(c) > int('g')) {
-      utils::die(std::string(1, c) + " is not a recognized Species_Type");
+  static int species_char_to_int(char species_char) {
+    if (int(species_char) < int('a') || int(species_char) > int('z')) {
+      utils::die(std::string(1, species_char) +
+                 " is not a recognized species_char");
     }
-    Species_Type species = static_cast<Species_Type>(int(c) - int('a'));
-    return species;
+    int species_int = int(species_char) - int('a');
+    return species_int;
   };
-  static const int max_n_species =
-      7;  // Should match number of letters in Species_Type enum above
+  static char species_int_to_char(int species_int) {
+    if (species_int < 0 || species_int > 25) {
+      utils::die(std::to_string(species_int) +
+                 " is not a recognized species_int");
+    }
+    char species_char = char(int('a') + species_int);
+    return species_char;
+  };
+  static const int max_n_species = 26;  // Only A-Z allowed
   void init_site_grid_vars();
   virtual void calculate_axes_grid_weights(int i_site,
                                            ArrayXi &subgrid_center_indices,
@@ -61,12 +63,13 @@ class Component {
                      // of coordinates) of this type in system
 
   // Store the center density distributions for each species in the component in
-  // a map data structure. For example, the B species center density array can
-  // be accessed in any of the following ways:
-  //   ArrayXd rho_b = rho_center_map[1];
-  //   ArrayXd rho_b = rho_center_map[Component::B];
-  //   Species_Type b = Component::B; ArrayXd rho_b = rho_center_map[b]
-  std::map<Species_Type, ArrayXd> rho_center_map;
+  // an array. For example, the B species center density array can
+  // be accessed like so:
+  //   ArrayXd rho_b = rho_center_list[1];
+  std::vector<ArrayXd> rho_center_list;
+
+  std::vector<int> species_list;  // List of all unique species types that make
+                                  // up the component
 
   ArrayXi site_types;    // Array of species type for each site
   ArrayXi molecule_ids;  // Each component has ids from 0 to n_molecules so that

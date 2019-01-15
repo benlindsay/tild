@@ -145,13 +145,13 @@ void Grid_Output::write_one_file(fs::path file_path, ArrayXXd &data) {
 
 void Grid_Output::write() {
   // Write center densities for each species of each component
-  for (size_t i = 0; i < sim->component_list.size(); i++) {
-    Component *comp = sim->component_list[i];
-    for (auto it = comp->rho_center_map.begin();
-         it != comp->rho_center_map.end(); it++) {
-      Component::Species_Type species = it->first;
-      ArrayXd rho_center = it->second;
-      char species_char = Component::species_enum_to_char(species);
+  for (size_t i_comp = 0; i_comp < sim->component_list.size(); i_comp++) {
+    Component *comp = sim->component_list[i_comp];
+    for (size_t i_species = 0; i_species < comp->species_list.size();
+         i_species++) {
+      int species = comp->species_list[i_species];
+      ArrayXd rho_center = comp->rho_center_list[species];
+      char species_char = Component::species_int_to_char(species);
       std::ostringstream file_name_ss;
       file_name_ss << "rho_" << comp->name << "_" << species_char;
       if (NPROCS > 1) {
@@ -167,11 +167,9 @@ void Grid_Output::write() {
 
   if (sim->iter == 0) {
     // Write convolution (smearing) function for each species
-    for (auto it = sim->conv_function_map.begin();
-         it != sim->conv_function_map.end(); it++) {
-      Component::Species_Type species = it->first;
-      ArrayXd conv_function = it->second;
-      char species_char = Component::species_enum_to_char(species);
+    for (int species = 0; species < sim->n_species; species++) {
+      ArrayXd conv_function = sim->conv_function_list[species];
+      char species_char = Component::species_int_to_char(species);
       std::ostringstream file_name_ss;
       file_name_ss << "conv_func_" << species_char;
       if (NPROCS > 1) {
@@ -185,8 +183,8 @@ void Grid_Output::write() {
     }
 
     // Write pair potentials
-    for (int i = 0; i < Component::max_n_species; i++) {
-      for (int j = i; j < Component::max_n_species; j++) {
+    for (int i = 0; i < sim->n_species; i++) {
+      for (int j = i; j < sim->n_species; j++) {
         if (sim->pair_potential_arrays[i][j].size() == 0) {
           continue;
         }
@@ -205,8 +203,8 @@ void Grid_Output::write() {
     }
 
     // Write pair potential gradients
-    for (int i = 0; i < Component::max_n_species; i++) {
-      for (int j = i; j < Component::max_n_species; j++) {
+    for (int i = 0; i < sim->n_species; i++) {
+      for (int j = i; j < sim->n_species; j++) {
         if (sim->pair_potential_gradient_arrays[i][j].size() == 0) {
           continue;
         }

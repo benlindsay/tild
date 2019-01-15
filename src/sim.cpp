@@ -57,23 +57,6 @@ Sim::Sim(YAML::Node input) {
     kappa = input["kappa"].as<double>();
   }
 
-  // Initialize chi
-  chi = ArrayXXd::Zero(Component::max_n_species, Component::max_n_species);
-  if (input["chi"]) {
-    for (YAML::const_iterator it = input["chi"].begin();
-         it != input["chi"].end(); it++) {
-      std::string species_pair = it->first.as<std::string>();
-      char species_1 = species_pair[0];
-      char species_2 = species_pair[1];
-      int species_1_int = int(species_1 - 'a');
-      int species_2_int = int(species_2 - 'a');
-      // Assign chi value to the right spot in the chi array
-      chi(species_1_int, species_2_int) = it->second.as<double>();
-    }
-  }
-  std::cout << "chi:" << std::endl;
-  std::cout << chi << std::endl;
-
   // Initialize random variables and objects
   if (!input["random_seed"]) {
     auto now = std::chrono::system_clock::now();
@@ -90,39 +73,88 @@ Sim::Sim(YAML::Node input) {
   // Initialize box/grid variables
   init_box_vars(input);
 
+  // Inizialize conv_function_list with empty arrays since the component
+  // constructors will fill this list
+  conv_function_list =
+      std::vector<ArrayXd>(Component::max_n_species, ArrayXd::Zero(0));
+
   // Initialize components
   init_component_list(input);
+
+  // Loop over all species in all components to find the number of species in
+  // system
+  n_species = 0;
+  for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
+    for (size_t i = 0; i < component_list[i_comp]->species_list.size(); i++) {
+      int species = component_list[i_comp]->species_list[i];
+      n_species = std::max(n_species, species + 1);
+    }
+  }
+
+  // Initialize lists that depend on n_species
+  conv_function_list.resize(n_species);
+  species_list = std::vector<bool>(n_species, 0);
+  diffusion_coeff_list = std::vector<double>(n_species, 1.0);
+  species_density_list = std::vector<ArrayXd>(n_species, ArrayXd::Zero(ML));
+  grad_field_list = std::vector<ArrayXXd>(n_species, ArrayXXd::Zero(ML, dim));
+
+  // Fill species_list
+  for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
+    for (size_t i = 0; i < component_list[i_comp]->species_list.size(); i++) {
+      int species = component_list[i_comp]->species_list[i];
+      species_list[species] = true;
+    }
+  }
+
+  // Check if there are any unused species between 0 and n_species-1
+  for (int species = 0; species < n_species; species++) {
+    if (species_list[species] == false) {
+      std::stringstream ss;
+      ss << "Warning: Species up through '"
+         << Component::species_int_to_char(n_species - 1)
+         << "' are present, but you're missing '"
+         << Component::species_int_to_char(species) << "'." << std::endl;
+      utils::print_one_line(ss);
+    }
+  }
 
   if (input["restart_file"]) {
     fs::path restart_file_path(input["restart_file"].as<std::string>());
     load_restart_file(restart_file_path);
   }
 
-  // Initialize diffusion coefficients
+  // Initialize chi
+  chi = ArrayXXd::Zero(n_species, n_species);
+  if (input["chi"]) {
+    for (YAML::const_iterator it = input["chi"].begin();
+         it != input["chi"].end(); it++) {
+      std::string species_pair = it->first.as<std::string>();
+      char species_1_char = species_pair[0];
+      char species_2_char = species_pair[1];
+      int species_1 = Component::species_char_to_int(species_1_char);
+      int species_2 = Component::species_char_to_int(species_2_char);
+      // Ensure species_1 < species_2
+      if (species_1 > species_2) {
+        int tmp = species_1;
+        species_1 = species_2;
+        species_2 = tmp;
+      }
+      // Assign chi value to the right spot in the chi array
+      chi(species_1, species_2) = it->second.as<double>();
+    }
+  }
+  std::cout << "chi grid:" << std::endl;
+  std::cout << chi << std::endl;
+
+  // Read diffusion coefficients from input file
   if (input["diffusion_coeffs"]) {
     for (YAML::const_iterator it = input["diffusion_coeffs"].begin();
          it != input["diffusion_coeffs"].end(); ++it) {
       char species_char = it->first.as<char>();
       double diffusion_coeff = it->second.as<double>();
-      Component::Species_Type species =
-          Component::species_char_to_enum(species_char);
-      diffusion_coeff_map[species] = diffusion_coeff;
+      int species = Component::species_char_to_int(species_char);
+      diffusion_coeff_list[species] = diffusion_coeff;
     }
-  }
-  // Set diffusion coefficients to 1.0 if not provided
-  for (auto it = conv_function_map.begin(); it != conv_function_map.end();
-       it++) {
-    Component::Species_Type species = it->first;
-    if (diffusion_coeff_map.count(species) == 0) {
-      diffusion_coeff_map[species] = 1.0;
-    }
-  }
-
-  // Set species density grids to zeros
-  for (auto it = conv_function_map.begin(); it != conv_function_map.end();
-       it++) {
-    Component::Species_Type species = it->first;
-    species_density_map[species] = ArrayXd::Zero(ML);
   }
 
   init_potentials();
@@ -333,31 +365,23 @@ void Sim::load_restart_file(fs::path restart_file_path) {
 }
 
 void Sim::init_potentials() {
-  for (auto it = conv_function_map.begin(); it != conv_function_map.end();
-       it++) {
-    Component::Species_Type species = it->first;
-    grad_field_map[species] = ArrayXXd::Zero(ML, dim);
+  for (int species = 0; species < n_species; species++) {
+    grad_field_list[species] = ArrayXXd::Zero(ML, dim);
   }
 
   pair_potential_arrays = std::vector<std::vector<ArrayXd> >(
-      Component::max_n_species,
-      std::vector<ArrayXd>(Component::max_n_species, ArrayXd()));
+      n_species, std::vector<ArrayXd>(n_species, ArrayXd()));
 
   pair_potential_gradient_arrays = std::vector<std::vector<ArrayXXd> >(
-      Component::max_n_species,
-      std::vector<ArrayXXd>(Component::max_n_species, ArrayXXd()));
+      n_species, std::vector<ArrayXXd>(n_species, ArrayXXd()));
 
   pair_potential_gradient_hat_arrays = std::vector<std::vector<ArrayXXcd> >(
-      Component::max_n_species,
-      std::vector<ArrayXXcd>(Component::max_n_species, ArrayXXcd()));
+      n_species, std::vector<ArrayXXcd>(n_species, ArrayXXcd()));
 
-  for (auto it_1 = conv_function_map.begin(); it_1 != conv_function_map.end();
-       it_1++) {
-    int species_int_i = static_cast<int>(it_1->first);
-    ArrayXd conv_func_i = it_1->second;
-    for (auto it_2 = it_1; it_2 != conv_function_map.end(); it_2++) {
-      int species_int_j = static_cast<int>(it_2->first);
-      ArrayXd conv_func_j = it_2->second;
+  for (int species_i = 0; species_i < n_species; species_i++) {
+    ArrayXd conv_func_i = conv_function_list[species_i];
+    for (int species_j = species_i; species_j < n_species; species_j++) {
+      ArrayXd conv_func_j = conv_function_list[species_j];
       ArrayXd pair_potential = ArrayXd::Zero(ML);
       ArrayXXd pair_potential_gradient = ArrayXXd::Zero(ML, dim);
       ArrayXXcd pair_potential_gradient_hat = ArrayXXcd::Zero(ML, dim);
@@ -368,10 +392,10 @@ void Sim::init_potentials() {
                           pair_potential_gradient);
 
       // Store calculated arrays inside 2d vectors for later access
-      pair_potential_arrays[species_int_i][species_int_j] = pair_potential;
-      pair_potential_gradient_hat_arrays[species_int_i][species_int_j] =
+      pair_potential_arrays[species_i][species_j] = pair_potential;
+      pair_potential_gradient_hat_arrays[species_i][species_j] =
           pair_potential_gradient_hat;
-      pair_potential_gradient_arrays[species_int_i][species_int_j] =
+      pair_potential_gradient_arrays[species_i][species_j] =
           pair_potential_gradient;
     }
   }
@@ -399,27 +423,17 @@ void Sim::run() {
 
 void Sim::calculate_grid_densities() {
   // Zero the species density grids stored in species_density_map
-  for (auto it = species_density_map.begin(); it != species_density_map.end();
-       it++) {
-    // it->second points to the actual species density array, for example
-    // species_density_map[A]
-    it->second = ArrayXd::Zero(ML);
+  for (int species = 0; species < n_species; species++) {
+    // Add each components' rho centers to the total density for each species
+    species_density_list[species] = ArrayXd::Zero(ML);
   }
   for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
     Component *comp = component_list[i_comp];
-    for (auto it = comp->rho_center_map.begin();
-         it != comp->rho_center_map.end(); it++) {
-      // it->second points to the actual rho_center density array, for example
-      // rho_center_map[A]
-      it->second = ArrayXd::Zero(ML);
-    }
     comp->calculate_grid_densities();
-    for (auto it = comp->rho_center_map.begin();
-         it != comp->rho_center_map.end(); it++) {
-      Component::Species_Type species = it->first;
-      // it->second points to the actual rho_center density array, for example
-      // rho_center_map[A]
-      species_density_map[species] += it->second;
+    for (size_t species = 0; species < comp->rho_center_list.size();
+         species++) {
+      // Add each components' rho centers to the total density for each species
+      species_density_list[species] += comp->rho_center_list[species];
     }
   }
 }
@@ -436,10 +450,8 @@ void Sim::calculate_forces() {
     bond_energy += comp->calculate_bond_forces_and_energy();
   }
 
-  for (auto it = conv_function_map.begin(); it != conv_function_map.end();
-       it++) {
-    Component::Species_Type species = it->first;
-    grad_field_map[species] = ArrayXXd::Zero(ML, dim);
+  for (int species = 0; species < n_species; species++) {
+    grad_field_list[species] = ArrayXXd::Zero(ML, dim);
   }
 
   // Fill fields in grad_field_map with species-species nonbonded interactions
@@ -448,22 +460,14 @@ void Sim::calculate_forces() {
   ArrayXXd field_grad_prod(ML, dim);
   std::complex<double> *field_grad_prod_hat_ptr = field_grad_prod_hat.data();
   double *field_grad_prod_ptr = field_grad_prod.data();
-  for (int i = 0; i < Component::max_n_species; i++) {
-    Component::Species_Type s_i = static_cast<Component::Species_Type>(i);
-    if (species_density_map.count(s_i) == 0) {
-      continue;
-    }
-    fftw_fwd(species_density_map[s_i], rho_hat);
-    for (int j = 0; j < Component::max_n_species; j++) {
-      Component::Species_Type s_j = static_cast<Component::Species_Type>(j);
-      if (species_density_map.count(s_j) == 0) {
-        continue;
-      }
-      int s_1 = std::min(i, j);
-      int s_2 = std::max(i, j);
+  for (int species_i = 0; species_i < n_species; species_i++) {
+    fftw_fwd(species_density_list[species_i], rho_hat);
+    for (int species_j = 0; species_j < n_species; species_j++) {
+      int species_1 = std::min(species_i, species_j);
+      int species_2 = std::max(species_i, species_j);
       double factor = 0.0;
-      if (chi(s_1, s_2) != 0.0) {
-        factor += chi(s_1, s_2) / rho_0;
+      if (chi(species_1, species_2) != 0.0) {
+        factor += chi(species_1, species_2) / rho_0;
       }
       if (kappa > 0) {
         factor += kappa / rho_0;
@@ -472,13 +476,14 @@ void Sim::calculate_forces() {
         continue;
       }
       field_grad_prod_hat =
-          pair_potential_gradient_hat_arrays[s_1][s_2].colwise() * rho_hat;
+          pair_potential_gradient_hat_arrays[species_1][species_2].colwise() *
+          rho_hat;
       for (int d = 0; d < dim; d++) {
         fftw_back(field_grad_prod_hat_ptr + d * ML,
                   field_grad_prod_ptr + d * ML);
       }
       // Species i acting on Species j
-      grad_field_map[s_j] += field_grad_prod * factor;
+      grad_field_list[species_j] += field_grad_prod * factor;
     }
   }
 
@@ -486,13 +491,12 @@ void Sim::calculate_forces() {
   for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
     Component *comp = component_list[i_comp];
     for (int i = 0; i < comp->n_sites; i++) {
-      Component::Species_Type species =
-          static_cast<Component::Species_Type>(comp->site_types[i]);
+      int species = comp->site_types[i];
       for (int d = 0; d < dim; d++) {
         for (int i_grid = 0; i_grid < n_subgrid_points; i_grid++) {
           int grid_ind = comp->site_grid_indices(i, i_grid);
           double grid_weight = comp->site_grid_weights(i, i_grid);
-          comp->site_forces(i, d) -= grad_field_map[species](grid_ind, d) *
+          comp->site_forces(i, d) -= grad_field_list[species](grid_ind, d) *
                                      grid_weight * grid_point_volume;
           if (comp->site_forces(i, d) > 10000.0) {
             std::cout << "force = " << comp->site_forces(i, d) << " > 100"

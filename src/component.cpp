@@ -96,8 +96,8 @@ void Component::add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
     }
     total_weight /= sim->grid_point_volume;
     // Actually add site to grid
-    Species_Type species = static_cast<Species_Type>(site_types[i_site]);
-    rho_center_map[species][global_index] += total_weight;
+    int species = site_types[i_site];
+    rho_center_list[species][global_index] += total_weight;
 
     site_grid_indices(i_site, i) = global_index;
     site_grid_weights(i_site, i) = total_weight;
@@ -107,10 +107,10 @@ void Component::add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
 
 void Component::calculate_grid_densities() {
   // Zero out rho_center fields
-  for (auto it = rho_center_map.begin(); it != rho_center_map.end(); it++) {
+  for (size_t species = 0; species < rho_center_list.size(); species++) {
     // it->second points to the actual rho_center density array, for example
     // rho_center_map[A]
-    it->second = ArrayXd::Zero(sim->ML);
+    rho_center_list[species] = ArrayXd::Zero(sim->ML);
   }
   ArrayXi subgrid_center_indices(sim->dim);
   ArrayXXdR axes_grid_weights(sim->dim, sim->mesh_order + 1);
@@ -126,8 +126,8 @@ void Component::calculate_grid_densities() {
 void Component::move_particles() {
   ArrayXd diff_dt(n_sites);
   for (int i = 0; i < n_sites; i++) {
-    Species_Type species = static_cast<Species_Type>(site_types[i]);
-    diff_dt[i] = sim->diffusion_coeff_map[species];
+    int species = site_types[i];
+    diff_dt[i] = sim->diffusion_coeff_list[species];
   }
   diff_dt *= sim->timestep;
   ArrayXXd random_array(n_sites, sim->dim);

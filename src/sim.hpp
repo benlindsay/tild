@@ -103,9 +103,12 @@ class Sim {
   ArrayXXi weight_subgrid_index_shifts;
 
   // Potential variables
-  std::map<Component::Species_Type, ArrayXd> conv_function_map;
-  std::map<Component::Species_Type, ArrayXd> species_density_map;
-  std::map<Component::Species_Type, ArrayXXd> grad_field_map;
+  std::vector<ArrayXd> conv_function_list;
+  std::vector<ArrayXd> species_density_list;
+  std::vector<ArrayXXd> grad_field_list;
+
+  std::vector<bool> species_list;  // i.e. if species_list[1] is true, at least
+                                   // one component has B species present
 
   std::vector<std::vector<ArrayXd> > pair_potential_arrays;
   std::vector<std::vector<ArrayXXd> > pair_potential_gradient_arrays;
@@ -115,11 +118,12 @@ class Sim {
   double bond_energy;
   double nonbond_energy;
 
+  int n_species;
   std::vector<Output *> output_list;
   std::vector<Component *> component_list;
   std::vector<std::string> default_summary_var_list;
 
-  std::map<Component::Species_Type, double> diffusion_coeff_map;
+  std::vector<double> diffusion_coeff_list;
 
   // FFTW variables
   fftw_plan forward_plan;

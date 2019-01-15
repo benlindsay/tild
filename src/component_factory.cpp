@@ -9,7 +9,7 @@ Component* Component_Factory::New_Component(Sim* sim, YAML::Node input,
                                             YAML::Node component_params) {
   std::string component_type = component_params["type"].as<std::string>();
   if (component_type == "homopolymer") {
-    Component::Species_Type species = Component::A;
+    int species = -1;
     double vol_frac = -1;
     int n_segments_per_molecule = -1;
     for (YAML::const_iterator it = component_params.begin();
@@ -20,13 +20,13 @@ Component* Component_Factory::New_Component(Sim* sim, YAML::Node input,
         continue;
       } else if (key == "species") {
         char species_char = value.as<char>();
-        species = Component::species_char_to_enum(species_char);
+        species = Component::species_char_to_int(species_char);
       } else if (key == "vol_frac") {
         vol_frac = value.as<double>();
       } else if (key == "n_segments_per_molecule") {
         n_segments_per_molecule = value.as<int>();
       } else {
-        utils::die("Can't recognize summary output parameter '" +
+        utils::die("Can't recognize homopolymer parameter '" +
                    value.as<std::string>() + "'");
       }
     }
