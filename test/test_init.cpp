@@ -8,8 +8,8 @@
 TEST_CASE("Bare bones input", "[input]") {
   const char* yaml_1 =
       "dim: 3\n"
-      "lx:  [1,2,3]\n"
-      "nx:  [10,10,10]\n"
+      "lx:  [1.1,2.2,3.3]\n"
+      "nx:  [11,11,11]\n"
       "rho_0: 10.0\n";
   YAML::Node input = YAML::Load(yaml_1);
 
@@ -34,7 +34,7 @@ TEST_CASE("Bare bones input", "[input]") {
   const char* yaml_2 =
       "dim: 3\n"
       "dx:  [.1,.2,.3]\n"
-      "nx:  [10,10,10]\n"
+      "nx:  [11,11,11]\n"
       "rho_0: 10.0\n";
   input = YAML::Load(yaml_2);
 
@@ -49,9 +49,9 @@ TEST_CASE("Bare bones input", "[input]") {
   sim = dynamic_cast<Canonical_Sim*>(single_sim_plan->sim);
 
   SECTION("Lx calculation") {
-    REQUIRE(sim->Lx[0] == 1);
-    REQUIRE(sim->Lx[1] == 2);
-    REQUIRE(sim->Lx[2] == 3);
+    REQUIRE(sim->Lx[0] == 1.1);
+    REQUIRE(sim->Lx[1] == 2.2);
+    REQUIRE(sim->Lx[2] == 3.3);
   }
 
   const char* yaml_3 =
