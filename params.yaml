@@ -39,7 +39,6 @@ outputs:
     pm3d_compatible: true
   lammpstrj:
     print_freq: 20
-    dummy_box_bounds: false
   summary:
     var_list: ["iter", "bond_energy", "nonbond_energy"]
     print_freq: 10
