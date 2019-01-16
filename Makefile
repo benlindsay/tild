@@ -1,7 +1,7 @@
 # compiler variables and flags
 CC := g++
 # CC := mpic++
-CFLAGS := -std=c++11 -g -Wall
+CFLAGS := -std=c++11 -g -Wall -O3
 # DFLAGS := -DMPI
 LIB := -L lib -lyaml-cpp -lboost_system -lboost_filesystem -lfftw3 # -lprofiler
 INC := -I include
@@ -25,8 +25,13 @@ YAML_FILES := lib/libyaml-cpp.a include/yaml-cpp/yaml.h
 BOOST_FILES := lib/libboost_filesystem.a lib/libboost_system.a
 
 # sources for tests
-TEST_SRC := test/test_main.o $(filter-out test/test_main.cpp, $(shell find test -name *.cpp))
-TEST_SRC += $(filter-out src/main.cpp, $(SOURCES))
+TEST_SRCDIR := test
+TEST_BUILDDIR := testbuild
+TEST_SOURCES := $(shell find $(TEST_SRCDIR) -name '*.$(SRCEXT)')
+TEST_SOURCES += $(filter-out $(SRCDIR)/main.cpp, $(SOURCES))
+TEST_OBJECTS := $(addprefix $(TEST_BUILDDIR)/, $(TEST_SOURCES:.$(SRCEXT)=.o))
+TEST_LIB_FILES := lib/libgtest.a lib/libgtest_main.a lib/libgmock.a
+TEST_LIB_FLAGS := -lgtest -lgtest_main -lgmock -pthread
 
 $(TARGET): $(YAML_FILES) $(BOOST_FILES) $(OBJECTS)
 	@echo " Linking..."
@@ -46,12 +51,14 @@ $(YAML_FILES):
 $(BOOST_FILES):
 	tools/install-boost.sh
 
+.PHONY: clean hardclean format
+
 clean:
 	@echo " Cleaning...";
-	$(RM) -r $(BUILDDIR)/* bin/*
+	$(RM) -rf $(BUILDDIR)/* $(TEST_BUILDDIR)/* bin/*
 
 hardclean: clean
-	$(RM) -r include/yaml-cpp include/boost lib test/*.o
+	$(RM) -rf include/{yaml-cpp,boost,gmock,gtest} lib
 
 format: tools/clang-format-all.sh tools/clang-format
 	@echo "Formatting .cpp and .hpp files..."
@@ -60,17 +67,19 @@ format: tools/clang-format-all.sh tools/clang-format
 tools/clang-format:
 	tools/install-clang-format.sh
 
-.PHONY: yaml-cpp clean hardclean format
-
 # Test stuff
-test/test_main.o: test/test_main.cpp test/catch.hpp
-	$(CC) $(CFLAGS) $< -c $(INC) -o $@
-
-bin/test: $(YAML_FILES) $(BOOST_FILES) $(TEST_SRC)
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(TEST_SRC) $(INC) -o $@ $(LIB)
+.PHONY: test
 
 test: bin/test
 	bin/test
 
-.PHONY: test
+bin/test: $(YAML_FILES) $(BOOST_FILES) $(TEST_LIB_FILES) $(TEST_OBJECTS)
+	@mkdir -p $(dir $@)
+	$(CC) $(TEST_OBJECTS) -o $@ $(LIB) $(TEST_LIB_FLAGS)
+
+$(TEST_LIB_FILES):
+	tools/install-googletest.sh
+
+$(TEST_BUILDDIR)/%.o: %.$(SRCEXT)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(DFLAGS) $(INC) -c -o $@ $<

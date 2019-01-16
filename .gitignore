@@ -3,6 +3,8 @@ build/
 html/
 include/yaml-cpp/
 include/boost/
+include/gtest/
+include/gmock/
 input/
 output*/
 lib/

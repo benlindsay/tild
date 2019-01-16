@@ -14,6 +14,6 @@ fi
 
 cd $PROJECT_ROOT
 
-find src test ! -path 'test/catch.hpp' \
+find src test \
   \( -name '*.cpp' -or -name '*.hpp' -or -name '*.c' -or -name '*.h' \) \
   | xargs -I% $CLANG_FORMAT -style=file -i %
