@@ -169,6 +169,8 @@ Sim::~Sim() {
   for (size_t i = 0; i < component_list.size(); i++) {
     delete component_list[i];
   }
+  free(fftw_in_array);
+  free(fftw_out_array);
 }
 
 void Sim::init_box_vars(YAML::Node input) {
