@@ -44,8 +44,7 @@ class Sim {
  public:
   Sim(YAML::Node input);
   virtual ~Sim();
-  virtual std::string get_var_as_string(std::string var_name, int str_len) = 0;
-  virtual void init_default_summary_var_list() = 0;
+  virtual void init_default_summary_options_list() = 0;
   virtual void init_output_list(YAML::Node input) = 0;
   virtual void calculate_grid_densities();
   virtual void calculate_forces();
@@ -121,7 +120,7 @@ class Sim {
   int n_species;
   std::vector<Output *> output_list;
   std::vector<Component *> component_list;
-  std::vector<std::string> default_summary_var_list;
+  std::vector<std::string> default_summary_options_list;
 
   std::vector<double> diffusion_coeff_list;
 

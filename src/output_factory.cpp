@@ -57,7 +57,7 @@ Output* Output_Factory::New_Output(Sim* sim, YAML::Node input,
     return new Lammpstrj_Output(sim, sim->component_list, output_dir,
                                 print_freq, name, one_frame_per_file);
   } else if (output_type == "summary") {
-    std::vector<std::string> var_list = sim->default_summary_var_list;
+    std::vector<std::string> options_list = sim->default_summary_options_list;
     int print_freq = Output::default_print_freq;
     std::string file_name = Summary_Output::default_file_name;
     int column_width = Output::default_column_width;
@@ -66,8 +66,8 @@ Output* Output_Factory::New_Output(Sim* sim, YAML::Node input,
          it != output_type_params.end(); ++it) {
       std::string key = it->first.as<std::string>();
       YAML::Node value = it->second;
-      if (key == "var_list") {
-        var_list = value.as<std::vector<std::string> >();
+      if (key == "options_list") {
+        options_list = value.as<std::vector<std::string> >();
       } else if (key == "print_freq") {
         print_freq = value.as<int>();
       } else if (key == "file_name") {
@@ -83,7 +83,7 @@ Output* Output_Factory::New_Output(Sim* sim, YAML::Node input,
     }
     fs::path output_dir(input["output_dir"].as<std::string>());
     fs::path file_path = output_dir / fs::path(file_name);
-    return new Summary_Output(sim, var_list, print_freq, file_path,
+    return new Summary_Output(sim, options_list, print_freq, file_path,
                               column_width, write_header);
   } else {
     utils::die("Can't recognize output type '" + output_type + "'!");

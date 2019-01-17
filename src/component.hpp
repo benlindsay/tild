@@ -56,11 +56,12 @@ class Component {
   virtual void move_particles();
 
   Sim *sim;
-  std::string name;  // Name of component
-  double vol_frac;   // Total volume fraction
-  int n_molecules;   // Total number of molecules of this type in system
-  int n_sites;       // Total number of sites (anything with its own set
-                     // of coordinates) of this type in system
+  std::string name;    // Name of component
+  std::string abbrev;  // Shorthand name of component
+  double vol_frac;     // Total volume fraction
+  int n_molecules;     // Total number of molecules of this type in system
+  int n_sites;         // Total number of sites (anything with its own set
+                       // of coordinates) of this type in system
 
   // Store the center density distributions for each species in the component in
   // an array. For example, the B species center density array can

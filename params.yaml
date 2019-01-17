@@ -40,7 +40,7 @@ outputs:
   lammpstrj:
     print_freq: 20
   summary:
-    var_list: ["iter", "bond_energy", "nonbond_energy"]
+    options_list: ["iter", "bond_energy", "nonbond_energy"]
     print_freq: 10
     column_width: 15
     write_header: true

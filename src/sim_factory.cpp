@@ -7,8 +7,8 @@
 Sim* Sim_Factory::New_Sim(YAML::Node input) {
   if (!input["sim_type"]) {
     utils::print_one_line(
-        "sim_type not included in input."
-        "Assuming canonical field theory simulation.");
+        "sim_type not included in input. "
+        "Assuming canonical simulation.");
     return new Canonical_Sim(input);
   } else if (input["sim_type"].as<std::string>() == "canonical") {
     return new Canonical_Sim(input);

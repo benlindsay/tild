@@ -16,6 +16,8 @@ class Output {
  public:
   Output(Sim *sim) : sim(sim){};
   virtual ~Output(){};
+  static void write_double(std::stringstream &ss, double value,
+                           int string_length);
   virtual bool is_time_to_write() = 0;
   virtual void write() = 0;
   static const int default_column_width = 15;
