@@ -51,11 +51,14 @@ $(YAML_FILES):
 $(BOOST_FILES):
 	tools/install-boost.sh
 
-.PHONY: clean hardclean format
+.PHONY: clean softclean hardclean format
 
 clean:
 	@echo " Cleaning...";
 	$(RM) -rf $(BUILDDIR)/* $(TEST_BUILDDIR)/* bin/*
+
+softclean:
+	$(RM) -rf $(BUILDDIR)/*{.o,_types,_plans} bin/*
 
 hardclean: clean
 	$(RM) -rf include/{yaml-cpp,boost,gmock,gtest} lib
