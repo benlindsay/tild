@@ -159,7 +159,7 @@ Gaussian random variable with variance of \f$2 \zeta \Delta t\f$
     \end{align*}
 \f]
 
-# A and B Homopolymer CFC
+## A and B Homopolymer CFC
 
 The system is composed of \f$n_{A,\textrm{tot}}=n_A + \lambda_A\f$ A homopolymers
 and \f$n_{B,\textrm{tot}} = n_B + \lambda_B\f$ B homopolymers with \f$N_A\f$ and
@@ -195,10 +195,7 @@ volume. \f$m_{\textrm{tot}}\f$ is defined as \f$m_{\textrm{tot}}=n_A N_A +
 n_B N_B\f$. When transferring mass of amount \f$\Delta m_{AB}\f$ from A to B
 homopolymers, the changes to \f$\lambda_A\f$ and \f$\lambda_B\f$ are given by
 \f[
-    \begin{align*}
-        \Delta \lambda_A =\;& -\Delta m_{AB} / N_A \\
-        \Delta \lambda_B =\;& \Delta m_{AB} / N_B
-    \end{align*}
+    \Delta \lambda_A N_A =\; - \Delta \lambda_B N_B =\; \Delta m_{AB}
 \f]
 
 The Flory-like potential energy of interactions between A and B molecules is
@@ -250,7 +247,7 @@ The semi-grand canonical partition function is given by
         \int d \mathbf{r}^{(n_A + \lambda_A) N_A + (n_B + \lambda_B) N_B}
         \\ &\times
         \exp[\beta (
-            \mu_A (n_A + \lambda_A) + \mu_B (n_B + \lambda_B) - U_1 - U_2)
+            \mu^\prime_A (n_A + \lambda_A) + \mu^\prime_B (n_B + \lambda_B) - U_1 - U_2)
         ]
         \\ &\times
         \delta (
@@ -274,7 +271,7 @@ which lets us rewrite the partition function as
         \\ &\times
         \exp[
             \beta (
-                \mu_A (n_A + \lambda_A) + \mu_B (n_B + \lambda_B) - U_1 - U_2
+                \mu^\prime_A (n_A + \lambda_A) + \mu^\prime_B (n_B + \lambda_B) - U_1 - U_2
             )
         ]
         \\ &\times
@@ -286,6 +283,37 @@ which lets us rewrite the partition function as
         \exp[
             - (n_A+\lambda_A) \ln \lambda_T^3
             - (n_B+\lambda_B) \ln \lambda_T^3
+        ]
+        \\ &\times
+        \delta (
+            m_{\textrm{tot}} - (n_A + \lambda_A) N_A - (n_B + \lambda_B) N_B
+        )
+    \end{align*}
+\f]
+Now let's combine the \f$\lambda_K\f$ terms with the \f$\ln(\lambda_T^3)\f$
+terms into effective chemical potentials \f$\mu_A\f$ and \f$\mu_B\f$ according
+to
+\f[
+    \begin{align*}
+        \beta \mu_A =&\; \beta \mu^\prime_A - \ln(\lambda_T^3) \\
+        \beta \mu_B =&\; \beta \mu^\prime_B - \ln(\lambda_T^3)
+    \end{align*}
+\f]
+This gives us
+\f[
+    \begin{align*}
+    \Psi =& \int d n_A \int d n_B \int d \lambda_A \int d \lambda_B
+        \int d \mathbf{r}^{(n_A + \lambda_A) N_A + (n_B + \lambda_B) N_B}
+        \\ &\times
+        \exp[
+            \beta (
+                \mu_A (n_A + \lambda_A) + \mu_B (n_B + \lambda_B) - U_1 - U_2
+            )
+        ]
+        \\ &\times
+        \exp[
+            - ((n_A+\lambda_A) \ln (n_A+\lambda_A) - (n_A+\lambda_A))
+            - ((n_B+\lambda_B) \ln (n_B+\lambda_B) - (n_B+\lambda_B))
         ]
         \\ &\times
         \delta (
@@ -315,7 +343,8 @@ instead of writing out the whole expression. So now we have
         \\ &\times
         \exp[
             \beta (
-                \mu_A (n_A + \lambda_A) + \mu_B (n_B + \lambda_B) - U_1 - U_2
+                \mu_A (n_A + \lambda_A) + \mu_B (n_B + \lambda_B)
+                - U_1 - U_2
             )
         ]
         \\ &\times
@@ -323,11 +352,7 @@ instead of writing out the whole expression. So now we have
             - ((n_A+\lambda_A) \ln (n_A+\lambda_A) - (n_A+\lambda_A))
             - ((n_B+\lambda_B) \ln (n_B+\lambda_B) - (n_B+\lambda_B))
         ]
-        \\ &\times
-        \exp[
-            - (n_A+\lambda_A) \ln \lambda_T^3
-            - (n_B+\lambda_B) \ln \lambda_T^3
-        ]
+        
     \end{align*}
 \f]
 This can be rewritten as
@@ -343,8 +368,8 @@ which gives us an effective Hamiltonian of
             \beta (
                 U_1 + U_2 - \mu_A (n_A + \lambda_A) - \mu_B (n_B + \lambda_B)
             )
-            \\ &+ (n_A + \lambda_A) (\ln (n_A + \lambda_A) - 1 + \ln \lambda_T^3)
-            \\ &+ (n_B + \lambda_B) (\ln (n_B + \lambda_B) - 1 + \ln \lambda_T^3)
+            \\ &+ (n_A + \lambda_A) (\ln (n_A + \lambda_A) - 1)
+            \\ &+ (n_B + \lambda_B) (\ln (n_B + \lambda_B) - 1)
     \end{align*}
 \f]
 To get the "force" on \f$\lambda_A\f$, we need to evaluate
@@ -365,9 +390,9 @@ where \f$\zeta\f$ determines the "diffusivity" for transfer between A and B and
         + \frac{\partial \mathcal \beta U_2}{\partial \lambda_A}
         - \beta \mu_A
         - \beta \mu_B \frac{\partial \lambda_B}{\partial \lambda_A}
-        \\ &+ \ln (n_A + \lambda_A) - 1 + \ln \lambda_T^3 + 1
+        \\ &+ \ln (n_A + \lambda_A) - 1 + 1
         \\ &+ \frac{\partial \lambda_B}{\partial \lambda_A}
-            (\ln (n_B + \lambda_B) - 1 + \ln \lambda_T^3)
+            (\ln (n_B + \lambda_B) - 1)
         \\ &+ (n_B + \lambda_B) \left(
             \frac{1}{n_B + \lambda_B}
             \frac{\partial \lambda_B}{\partial \lambda_A}
@@ -377,8 +402,8 @@ where \f$\zeta\f$ determines the "diffusivity" for transfer between A and B and
         + \frac{\partial \mathcal \beta U_2}{\partial \lambda_A N_A}
         - \frac{\beta \mu_A}{N_A}
         + \frac{\beta \mu_B}{N_B}
-        \\ &+ \frac{\ln (n_A + \lambda_A) + \ln \lambda_T^3}{N_A}
-        - \frac{\ln (n_B + \lambda_B) + \ln \lambda_T^3}{N_B}
+        \\ &+ \frac{\ln (n_A + \lambda_A)}{N_A}
+        - \frac{\ln (n_B + \lambda_B)}{N_B}
     \end{align*}
 \f]
 \f[
