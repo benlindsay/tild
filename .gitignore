@@ -17,7 +17,7 @@ tools/clang-format
 /*.dat
 
 # Ignore Mac specific files
-.DS_Store
+*.DS_Store
 
 # Ignore vim ctags file
 .tags
