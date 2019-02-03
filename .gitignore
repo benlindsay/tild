@@ -19,8 +19,11 @@ tools/clang-format
 # Ignore Mac specific files
 *.DS_Store
 
-# Ignore vim ctags file
+# Ignore vim tags file
 .tags
+GPATH
+GRTAGS
+GTAGS
 
 # Ignore VSCode stuff
 .vscode/
