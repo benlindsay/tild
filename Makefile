@@ -51,7 +51,11 @@ $(YAML_FILES):
 $(BOOST_FILES):
 	tools/install-boost.sh
 
-.PHONY: clean softclean hardclean format
+.PHONY: clean softclean hardclean format html
+
+html:
+	$(RM) -r html
+	doxygen Doxyfile
 
 clean:
 	@echo " Cleaning...";
