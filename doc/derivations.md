@@ -239,12 +239,9 @@ The semi-grand canonical partition function is given by
 \f[
     \begin{align*}
     \Psi =& \int d n_A \int d n_B \int d \lambda_A \int d \lambda_B
-        \frac{1}{
-            (n_A + \lambda_A)! (n_B + \lambda_B)!
-            (\lambda_T^3)^{n_A + \lambda_A + n_B + \lambda_B}
-        }
+        \frac{1}{n_A! n_B! (\lambda_T^3)^{n_A + \lambda_A + n_B + \lambda_B}}
         \\ &\times
-        \int d \mathbf{r}^{(n_A + \lambda_A) N_A + (n_B + \lambda_B) N_B}
+        \int d \mathbf{r}^{(n_A + 1) N_A + (n_B + 1) N_B}
         \\ &\times
         \exp[\beta (
             \mu^\prime_A (n_A + \lambda_A) + \mu^\prime_B (n_B + \lambda_B) - U_1 - U_2)
@@ -255,32 +252,27 @@ The semi-grand canonical partition function is given by
         )
     \end{align*}
 \f]
-We will need a continuous approximation for the factorials in order to
-differentiate them with respect to \f$\lambda\f$.
-We can use Sterling's approximation which states that
+We can convert the factorials into a continuous form using Sterling's
+approximation, which states that
 \f[
     \begin{align*}
     n! \approx e^{n \ln n - n}
     \end{align*}
 \f]
-which lets us rewrite the partition function as
+This lets us rewrite the partition function as
 \f[
     \begin{align*}
     \Psi =& \int d n_A \int d n_B \int d \lambda_A \int d \lambda_B
-        \int d \mathbf{r}^{(n_A + \lambda_A) N_A + (n_B + \lambda_B) N_B}
+        \int d \mathbf{r}^{(n_A + 1) N_A + (n_B + 1) N_B}
         \\ &\times
         \exp[
             \beta (
-                \mu^\prime_A (n_A + \lambda_A) + \mu^\prime_B (n_B + \lambda_B) - U_1 - U_2
+                \mu^\prime_A (n_A + \lambda_A) + \mu^\prime_B (n_B + \lambda_B)
+                - U_1 - U_2
             )
         ]
-        \\ &\times
-        \exp[
-            - ((n_A+\lambda_A) \ln (n_A+\lambda_A) - (n_A+\lambda_A))
-            - ((n_B+\lambda_B) \ln (n_B+\lambda_B) - (n_B+\lambda_B))
-        ]
-        \\ &\times
-        \exp[
+        \\ &\times \exp[ - (n_A \ln n_A - n_A) - (n_B \ln n_B - n_B) ]
+        \\ &\times \exp[
             - (n_A+\lambda_A) \ln \lambda_T^3
             - (n_B+\lambda_B) \ln \lambda_T^3
         ]
@@ -290,9 +282,9 @@ which lets us rewrite the partition function as
         )
     \end{align*}
 \f]
-Now let's combine the \f$\lambda_K\f$ terms with the \f$\ln(\lambda_T^3)\f$
-terms into effective chemical potentials \f$\mu_A\f$ and \f$\mu_B\f$ according
-to
+Now let's combine the \f$\lambda_A\f$ and \f$\lambda_A\f$ terms with the
+\f$\ln(\lambda_T^3)\f$ terms into effective chemical potentials \f$\mu_A\f$
+and \f$\mu_B\f$ according to
 \f[
     \begin{align*}
         \beta \mu_A =&\; \beta \mu^\prime_A - \ln(\lambda_T^3) \\
@@ -303,7 +295,7 @@ This gives us
 \f[
     \begin{align*}
     \Psi =& \int d n_A \int d n_B \int d \lambda_A \int d \lambda_B
-        \int d \mathbf{r}^{(n_A + \lambda_A) N_A + (n_B + \lambda_B) N_B}
+        \int d \mathbf{r}^{(n_A + 1) N_A + (n_B + 1) N_B}
         \\ &\times
         \exp[
             \beta (
@@ -311,10 +303,7 @@ This gives us
             )
         ]
         \\ &\times
-        \exp[
-            - ((n_A+\lambda_A) \ln (n_A+\lambda_A) - (n_A+\lambda_A))
-            - ((n_B+\lambda_B) \ln (n_B+\lambda_B) - (n_B+\lambda_B))
-        ]
+        \exp[ - (n_A \ln n_A - n_A) - (n_B \ln n_B - n_B) ]
         \\ &\times
         \delta (
             m_{\textrm{tot}} - (n_A + \lambda_A) N_A - (n_B + \lambda_B) N_B
@@ -339,37 +328,31 @@ instead of writing out the whole expression. So now we have
 \f[
     \begin{align*}
     \Psi =& \int d n_A \int d n_B \int d \lambda_A
-        \int d \mathbf{r}^{(n_A + \lambda_A) N_A + (n_B + \lambda_B) N_B}
+        \int d \mathbf{r}^{(n_A + 1) N_A + (n_B + 1) N_B}
         \\ &\times
         \exp[
             \beta (
-                \mu_A (n_A + \lambda_A) + \mu_B (n_B + \lambda_B)
-                - U_1 - U_2
+                \mu_A (n_A + \lambda_A) + \mu_B (n_B + \lambda_B) - U_1 - U_2
             )
         ]
         \\ &\times
-        \exp[
-            - ((n_A+\lambda_A) \ln (n_A+\lambda_A) - (n_A+\lambda_A))
-            - ((n_B+\lambda_B) \ln (n_B+\lambda_B) - (n_B+\lambda_B))
-        ]
-        
+        \exp[ - (n_A \ln n_A - n_A) - (n_B \ln n_B - n_B) ]
     \end{align*}
 \f]
 This can be rewritten as
 \f[
     \Psi = \int d n_A \int d n_B \int d \lambda_A
-        \int d \mathbf{r}^{(n_A + \lambda_A) N_A + (n_B + \lambda_B) N_B}
+        \int d \mathbf{r}^{(n_A + 1) N_A + (n_B + 1) N_B}
         \exp(-\mathcal{H})
 \f]
-which gives us an effective Hamiltonian of
+with an effective Hamiltonian of
 \f[
     \begin{align*}
         \mathcal{H} =\;&
             \beta (
                 U_1 + U_2 - \mu_A (n_A + \lambda_A) - \mu_B (n_B + \lambda_B)
             )
-            \\ &+ (n_A + \lambda_A) (\ln (n_A + \lambda_A) - 1)
-            \\ &+ (n_B + \lambda_B) (\ln (n_B + \lambda_B) - 1)
+            \\ &+ n_A (\ln n_A - 1) + n_B (\ln n_B - 1)
     \end{align*}
 \f]
 To get the "force" on \f$\lambda_A\f$, we need to evaluate
@@ -390,20 +373,11 @@ where \f$\zeta\f$ determines the "diffusivity" for transfer between A and B and
         + \frac{\partial \mathcal \beta U_2}{\partial \lambda_A}
         - \beta \mu_A
         - \beta \mu_B \frac{\partial \lambda_B}{\partial \lambda_A}
-        \\ &+ \ln (n_A + \lambda_A) - 1 + 1
-        \\ &+ \frac{\partial \lambda_B}{\partial \lambda_A}
-            (\ln (n_B + \lambda_B) - 1)
-        \\ &+ (n_B + \lambda_B) \left(
-            \frac{1}{n_B + \lambda_B}
-            \frac{\partial \lambda_B}{\partial \lambda_A}
-            \right)
     \\ \frac{\partial \mathcal H}{\partial \lambda_A N_A} =&
         \frac{\partial \mathcal \beta U_1}{\partial \lambda_A N_A}
         + \frac{\partial \mathcal \beta U_2}{\partial \lambda_A N_A}
         - \frac{\beta \mu_A}{N_A}
         + \frac{\beta \mu_B}{N_B}
-        \\ &+ \frac{\ln (n_A + \lambda_A)}{N_A}
-        - \frac{\ln (n_B + \lambda_B)}{N_B}
     \end{align*}
 \f]
 \f[
