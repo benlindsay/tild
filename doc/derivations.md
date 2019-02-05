@@ -428,3 +428,128 @@ where \f$\zeta\f$ determines the "diffusivity" for transfer between A and B and
         (\hat{\rho}_{tot}(\mathbf{r}^\prime) - \rho_0) \\
     \end{align*}
 \f]
+
+## General Semi-Grand Canonical CFC Derivation
+
+Suppose we have a system of \f$ n_s \f$ types of species. The \f$ \chi \f$ and
+\f$ \kappa \f$ parts of the nonbonded energy are given by
+\f[
+    \begin{align*}
+      U_{\chi} =& \sum_{I<J} \frac{\chi_{IJ}}{\rho_0}
+        \int d \mathbf{r} \int d \mathbf{r^\prime}
+        \tilde{\rho}_I(\mathbf{r})
+        ( h_I \ast h_J)(\mathbf{r} - \mathbf{r^\prime})
+        \tilde{\rho}_J(\mathbf{r^\prime}) \\
+      U_{\kappa} =& \frac{\kappa}{2\rho_0}
+        \int d \mathbf{r} \left(
+            \sum_I (\tilde{\rho}_I \ast h_I)(\mathbf{r}) - \rho_0
+        \right)^2
+      \\ =& \frac{\kappa}{2 \rho_0}
+        \int d \mathbf{r} \int d \mathbf{r^\prime}
+        \sum_{I} \tilde{\rho}_I(\mathbf{r})
+        ( h_I \ast h_I)(\mathbf{r} - \mathbf{r^\prime})
+        \tilde{\rho}_I(\mathbf{r^\prime})
+        + \frac{\kappa}{\rho_0}
+        \int d \mathbf{r} \int d \mathbf{r^\prime}
+        \sum_{I<J} \tilde{\rho}_I(\mathbf{r})
+        ( h_I \ast h_J)(\mathbf{r} - \mathbf{r^\prime})
+        \tilde{\rho}_J(\mathbf{r^\prime})
+        \\ &- 2 \frac{\kappa}{\rho_0} 
+        \int d \mathbf{r}
+            \rho_0 \sum_I ( \tilde{\rho}_I \ast h_I)(\mathbf{r})
+        \\ &+ \frac{\kappa}{2 \rho_0} \int d \mathbf{r} \rho_0^2
+    \end{align*}
+\f]
+Let \f$ m_1 \f$ and \f$ m_2 \f$ represent the mass of 1 whole molecule of
+components 1 and 2, respectively. Each component can be composed of any
+combination of species. We want to find \f$ \frac{\partial U}{\partial
+\lambda_1 m_1} \f$. Let's look at the last two terms in \f$ U_{\kappa} \f$.
+The last term is constant, so that one doesn't contribute to the derivative.
+The derivative of the second to last term is
+\f[
+  \begin{align*}
+    \frac{\partial}{\partial \lambda_1 m_1}
+    \left(
+      - 2 \frac{\kappa}{\rho_0} 
+      \int d \mathbf{r}
+        \rho_0 \sum_I ( \tilde{\rho}_I \ast h_I)(\mathbf{r})
+    \right)
+    &= - 2 \kappa
+    \int d \mathbf{r} \left(
+      \frac{1}{m_1} \sum_{j=1}^{N_1} h_{K_{1,j}}(\mathbf{r})
+      - \frac{1}{m_2} \sum_{j=1}^{N_2} h_{K_{2,j}}(\mathbf{r})
+    \right)
+    \\ &= - 2 \kappa
+    \int d \mathbf{r} \left( \frac{m_1}{m_1} - \frac{m_2}{m_2} \right)
+    \\ &= 0
+  \end{align*}
+\f]
+So now we have
+\f[
+    \begin{align*}
+    \frac{\partial U_\chi}{\partial \lambda_1 m_1} =&
+        \frac{1}{m_1}
+        \int d\mathbf{r} \int d\mathbf{r^\prime}
+        \sum_{J=1}^{n_s}
+        \sum_{i=1}^{N_1}
+        \frac{\chi_{K_{1,i}J}}{\rho_0}
+        \delta(\mathbf{r} - \mathbf{r}_{p1,i})
+        (h_{K_{1,i}} \ast h_J)(\mathbf{r} - \mathbf{r}^\prime)
+        \tilde{\rho}_J(\mathbf{r}^\prime)
+        \\ &- 
+        \frac{1}{m_2}
+        \int d\mathbf{r} \int d\mathbf{r^\prime}
+        \sum_{J=1}^{n_s}
+        \sum_{i=1}^{N_2}
+        \frac{\chi_{K_{2,i}J}}{\rho_0}
+        \delta(\mathbf{r} - \mathbf{r}_{p2,i})
+        (h_{K_{2,i}} \ast h_J)(\mathbf{r} - \mathbf{r}^\prime)
+        \tilde{\rho}_J(\mathbf{r}^\prime)
+    \end{align*}
+\f]
+and
+\f[
+    \begin{align*}
+    \frac{\partial U_\kappa}{\partial \lambda_1 m_1} =&
+        \frac{1}{m_1}
+        \int d\mathbf{r} \int d\mathbf{r^\prime}
+        \sum_{J=1}^{n_s}
+        \sum_{i=1}^{N_1}
+        \frac{\kappa}{\rho_0}
+        \delta(\mathbf{r} - \mathbf{r}_{p1,i})
+        (h_{K_{1,i}} \ast h_J)(\mathbf{r} - \mathbf{r}^\prime)
+        \tilde{\rho}_J(\mathbf{r}^\prime)
+        \\ &- 
+        \frac{1}{m_2}
+        \int d\mathbf{r} \int d\mathbf{r^\prime}
+        \sum_{J=1}^{n_s}
+        \sum_{i=1}^{N_2}
+        \frac{\kappa}{\rho_0}
+        \delta(\mathbf{r} - \mathbf{r}_{p2,i})
+        (h_{K_{2,i}} \ast h_J)(\mathbf{r} - \mathbf{r}^\prime)
+        \tilde{\rho}_J(\mathbf{r}^\prime)
+    \end{align*}
+\f]
+Combining them, if we define \f$U_{\chi \kappa} = U_\chi + U_\kappa\f$, we get
+\f[
+    \begin{align*}
+    \frac{\partial U_{\chi \kappa}}{\partial \lambda_1 m_1} =&
+        \frac{1}{m_1}
+        \int d\mathbf{r} \int d\mathbf{r^\prime}
+        \sum_{J=1}^{n_s}
+        \sum_{i=1}^{N_1}
+        \frac{\chi_{K_{1,i}J} + \kappa}{\rho_0}
+        \delta(\mathbf{r} - \mathbf{r}_{p1,i})
+        (h_{K_{1,i}} \ast h_J)(\mathbf{r} - \mathbf{r}^\prime)
+        \tilde{\rho}_J(\mathbf{r}^\prime)
+        \\ &- 
+        \frac{1}{m_2}
+        \int d\mathbf{r} \int d\mathbf{r^\prime}
+        \sum_{J=1}^{n_s}
+        \sum_{i=1}^{N_2}
+        \frac{\chi_{K_{2,i}J} + \kappa}{\rho_0}
+        \delta(\mathbf{r} - \mathbf{r}_{p2,i})
+        (h_{K_{2,i}} \ast h_J)(\mathbf{r} - \mathbf{r}^\prime)
+        \tilde{\rho}_J(\mathbf{r}^\prime)
+    \end{align*}
+\f]
