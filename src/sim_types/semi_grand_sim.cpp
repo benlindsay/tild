@@ -176,10 +176,9 @@ void Semi_Grand_Sim::update_fractional_presence() {
   comp_1->add_to_fractional_presence(delta_lambda_1);
   comp_2->add_to_fractional_presence(delta_lambda_2);
 
-  // Have different conditions based on what type of components 1 and 2 are
-
-  // Things to do when/after changing volume fractions:
-  //   - update species_vol_frac_list
+  double prev_rho_0 = rho_0;
+  recalculate_component_vol_fracs();
+  assert(std::abs(rho_0 - prev_rho_0) < EPSILON);
 }
 
 void Semi_Grand_Sim::run() {

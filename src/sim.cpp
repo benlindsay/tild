@@ -442,6 +442,17 @@ void Sim::recalculate_rho_0() {
   rho_0 = total_component_mass / V;
 }
 
+void Sim::recalculate_component_vol_fracs() {
+  recalculate_rho_0();
+  for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
+    Component *comp = component_list[i_comp];
+    double component_mass =
+        (comp->n_molecules - 1 + comp->last_molecule_fractional_presence) *
+        comp->molecule_mass;
+    comp->vol_frac = component_mass / (rho_0 * V);
+  }
+}
+
 void Sim::calculate_grid_densities() {
   // Zero the species density grids stored in species_density_map
   for (int species = 0; species < n_species; species++) {

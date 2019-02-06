@@ -5,6 +5,8 @@
 #ifndef SEMI_GRAND_SIM_HPP
 #define SEMI_GRAND_SIM_HPP
 
+#define EPSILON 1.0e-7
+
 #include <vector>
 #include "../component.hpp"
 #include "../sim.hpp"

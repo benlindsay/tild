@@ -51,6 +51,7 @@ class Sim {
   virtual void move_particles();
   virtual void run();
   void recalculate_rho_0();
+  void recalculate_component_vol_fracs();
   int get_global_index(int ix_global, int iy_global);
   int get_global_index(int ix_global, int iy_global, int iz_global);
   ArrayXd pbc_r2_minus_r1(ArrayXd r1, ArrayXd r2);
