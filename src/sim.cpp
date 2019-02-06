@@ -434,7 +434,9 @@ void Sim::recalculate_rho_0() {
   double total_component_mass = 0.0;
   for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
     Component *comp = component_list[i_comp];
-    double component_mass = comp->n_molecules * comp->molecule_mass;
+    double component_mass =
+        (comp->n_molecules - 1 + comp->last_molecule_fractional_presence) *
+        comp->molecule_mass;
     total_component_mass += component_mass;
   }
   rho_0 = total_component_mass / V;
