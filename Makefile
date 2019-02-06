@@ -9,7 +9,8 @@ ifdef FFTW_DIR
     INC += -I $(FFTW_DIR)/include
     LIB += -L $(FFTW_DIR)/lib
 endif
-TARGET := bin/drift
+TARGET := bin/tild
+COMMIT_TARGET := $(shell echo bin/tild-$$(git describe --tags))
 
 # build sources and objects lists
 SRCDIR := src
@@ -51,7 +52,10 @@ $(YAML_FILES):
 $(BOOST_FILES):
 	tools/install-boost.sh
 
-.PHONY: clean softclean hardclean format html
+.PHONY: commit html clean softclean hardclean format
+
+commit: $(TARGET)
+	cp $(TARGET) $(COMMIT_TARGET)
 
 html:
 	$(RM) -r html
@@ -59,10 +63,10 @@ html:
 
 clean:
 	@echo " Cleaning...";
-	$(RM) -rf $(BUILDDIR)/* $(TEST_BUILDDIR)/* bin/*
+	$(RM) -rf $(BUILDDIR)/* $(TEST_BUILDDIR)/* $(TARGET) bin/test
 
 softclean:
-	$(RM) -rf $(BUILDDIR)/*{.o,_types,_plans} bin/*
+	$(RM) -rf $(BUILDDIR)/*{.o,_types,_plans} $(TARGET) bin/test
 
 hardclean: clean
 	$(RM) -rf include/{yaml-cpp,boost,gmock,gtest} lib
