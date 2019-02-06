@@ -21,11 +21,13 @@ using Eigen::ArrayXXd;  // Dynamically sized 2D double Array
 typedef Array<double, Dynamic, Dynamic, RowMajor>
     ArrayXXdR;  // Like ArrayXXd but with data contiguous along the rows
 typedef Array<int, Dynamic, Dynamic, RowMajor>
-    ArrayXXiR;  // Like ArrayXXi but with data contiguous along the rows
+    ArrayXXiR;          // Like ArrayXXi but with data contiguous along the rows
+using Eigen::NoChange;  // Used in conservativeResize command
 
 class Component {
  public:
-  Component(Sim *sim, double vol_frac) : sim(sim), vol_frac(vol_frac){};
+  Component(Sim *sim, double vol_frac, double chemical_potential)
+      : sim(sim), vol_frac(vol_frac), chemical_potential(chemical_potential){};
   virtual ~Component(){};
   static int species_char_to_int(char species_char) {
     if (int(species_char) < int('a') || int(species_char) > int('z')) {
@@ -50,18 +52,25 @@ class Component {
                                            ArrayXXdR &axes_grid_weights);
   virtual void add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
                                 ArrayXXdR &axes_grid_weights);
+  virtual void add_to_fractional_presence(double delta_lambda);
+  virtual void add_or_remove_molecule(int delta_molecules);
+  virtual void add_new_molecule() { add_or_remove_molecule(1); };
+  virtual void remove_last_molecule() { add_or_remove_molecule(-1); };
+  virtual void set_molecule_coords(int molecule_id) = 0;
   virtual void calculate_grid_densities();
   virtual double calculate_bond_forces_and_energy() = 0;
   virtual int get_mol_id(int site_id) = 0;
+  virtual int get_mol_first_site_id(int molecule_id) = 0;
   virtual void move_particles();
 
   Sim *sim;
   std::string name;    // Name of component
   std::string abbrev;  // Shorthand name of component
   double vol_frac;     // Total volume fraction
-  int n_molecules;     // Total number of molecules of this type in system
-  int n_sites;         // Total number of sites (anything with its own set
-                       // of coordinates) of this type in system
+  double molecule_mass;
+  int n_molecules;  // Total number of molecules of this type in system
+  int n_sites;      // Total number of sites (anything with its own set
+                    // of coordinates) of this type in system
 
   // Store the center density distributions for each species in the component in
   // an array. For example, the B species center density array can
@@ -72,18 +81,24 @@ class Component {
   std::vector<int> species_list;  // List of all unique species types that make
                                   // up the component
 
-  ArrayXi site_types;    // Array of species type for each site
-  ArrayXi molecule_ids;  // Each component has ids from 0 to n_molecules so that
-                         // they don't have change if other components add or
-                         // subtract molecules
-  ArrayXXd site_coords;  // Coordinates of sites
-  ArrayXXd site_forces;  // Coordinates of sites
+  ArrayXi site_types;         // Array of species type for each site
+  ArrayXi site_molecule_ids;  // Each component has ids from 0 to n_molecules so
+                              // that they don't have change if other components
+                              // add or subtract molecules
+
+  ArrayXXd site_coords;         // Coordinates of sites
+  ArrayXXd site_forces;         // Coordinates of sites
   ArrayXXiR site_grid_indices;  // Element (i, j) contains global (i.e. [0, M) )
                                 // index of jth grid point near particle i
-  ArrayXXdR
-      site_grid_weights;  // Element (i, j) contains weight associated with
-                          // grid point whos element you see in
-                          // site_grid_indices(i, j)
+  ArrayXXdR site_grid_weights;  // Element (i, j) contains weight associated
+                                // with grid point whos element you see in
+                                // site_grid_indices(i, j)
+
+  double chemical_potential;
+  double last_molecule_fractional_presence;
+  double max_n_molecules;  // Maximum value of n_full_molecules +
+                           // n_partial_molecules (i.e. n_molecules - 1 +
+                           // last_molecule_fractional_presence)
 };
 
 #include "component_types/homopolymer.hpp"

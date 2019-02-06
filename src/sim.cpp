@@ -4,7 +4,7 @@
 
 #include "sim.hpp"
 
-Sim::Sim(YAML::Node input) {
+void Sim::init(YAML::Node input) {
   utils::print_one_line("Initializing Sim");
   // Initialize dim
   if (!input["dim"]) {
@@ -14,6 +14,7 @@ Sim::Sim(YAML::Node input) {
   }
 
   iter = 0;
+  do_fractional_molecules = false;
 
   // Initialize max_iter
   if (!input["max_iter"]) {
@@ -79,7 +80,12 @@ Sim::Sim(YAML::Node input) {
       std::vector<ArrayXd>(Component::max_n_species, ArrayXd::Zero(0));
 
   // Initialize components
+  // This will call the derived class's init_component_list() function (i.e.
+  // Semi_Grand_Sim::init_component_list() ) instead of the base class
+  // ( Sim::init_component_list() ) if one has been defined
   init_component_list(input);
+
+  recalculate_rho_0();
 
   // Loop over all species in all components to find the number of species in
   // system
@@ -303,9 +309,10 @@ void Sim::init_component_list(YAML::Node input) {
     utils::die("component_list has already been filled!");
   }
   YAML::Node components = input["components"];
+  bool fractional_component = false;
   for (std::size_t i = 0; i < components.size(); i++) {
-    Component *comp =
-        Component_Factory::New_Component(this, input, components[i]);
+    Component *comp = Component_Factory::New_Component(
+        this, input, components[i], fractional_component);
     component_list.push_back(comp);
   }
 }
@@ -423,6 +430,16 @@ void Sim::run() {
   write_outputs();
 }
 
+void Sim::recalculate_rho_0() {
+  double total_component_mass = 0.0;
+  for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
+    Component *comp = component_list[i_comp];
+    double component_mass = comp->n_molecules * comp->molecule_mass;
+    total_component_mass += component_mass;
+  }
+  rho_0 = total_component_mass / V;
+}
+
 void Sim::calculate_grid_densities() {
   // Zero the species density grids stored in species_density_map
   for (int species = 0; species < n_species; species++) {
@@ -468,12 +485,8 @@ void Sim::calculate_forces() {
       int species_1 = std::min(species_i, species_j);
       int species_2 = std::max(species_i, species_j);
       double factor = 0.0;
-      if (chi(species_1, species_2) != 0.0) {
-        factor += chi(species_1, species_2) / rho_0;
-      }
-      if (kappa > 0) {
-        factor += kappa / rho_0;
-      }
+      factor += chi(species_1, species_2) / rho_0;
+      factor += kappa / rho_0;
       if (factor == 0.0) {
         continue;
       }
@@ -492,18 +505,24 @@ void Sim::calculate_forces() {
   // Accumulate the nonbonded forces
   for (size_t i_comp = 0; i_comp < component_list.size(); i_comp++) {
     Component *comp = component_list[i_comp];
-    for (int i = 0; i < comp->n_sites; i++) {
-      int species = comp->site_types[i];
+    for (int i_site = 0; i_site < comp->n_sites; i_site++) {
+      int species = comp->site_types[i_site];
       for (int d = 0; d < dim; d++) {
+        double force = 0.0;
         for (int i_grid = 0; i_grid < n_subgrid_points; i_grid++) {
-          int grid_ind = comp->site_grid_indices(i, i_grid);
-          double grid_weight = comp->site_grid_weights(i, i_grid);
-          comp->site_forces(i, d) -= grad_field_list[species](grid_ind, d) *
-                                     grid_weight * grid_point_volume;
-          if (comp->site_forces(i, d) > 10000.0) {
-            std::cout << "force = " << comp->site_forces(i, d) << " > 100"
-                      << std::endl;
-          }
+          int grid_ind = comp->site_grid_indices(i_site, i_grid);
+          double grid_weight = comp->site_grid_weights(i_site, i_grid);
+          force -= grad_field_list[species](grid_ind, d) * grid_weight *
+                   grid_point_volume;
+        }
+        if (i_comp < 2 &&
+            comp->site_molecule_ids[i_site] == comp->n_molecules - 1) {
+          force *= comp->last_molecule_fractional_presence;
+        }
+        comp->site_forces(i_site, d) += force;
+        if (comp->site_forces(i_site, d) > 10000.0) {
+          std::cout << "force = " << comp->site_forces(i_site, d) << " > 100"
+                    << std::endl;
         }
       }
     }

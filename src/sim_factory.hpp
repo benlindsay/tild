@@ -7,6 +7,7 @@
 
 #include "sim.hpp"
 #include "sim_types/canonical_sim.hpp"
+#include "sim_types/semi_grand_sim.hpp"
 #include "utils.hpp"
 #include "yaml-cpp/yaml.h"
 

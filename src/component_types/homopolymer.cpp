@@ -4,9 +4,10 @@
 
 #include "homopolymer.hpp"
 
-Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
-                         int species)
-    : Component(sim, vol_frac),
+Homopolymer::Homopolymer(Sim *sim, double vol_frac, double chemical_potential,
+                         int n_segments_per_molecule, int species,
+                         bool fractional_component)
+    : Component(sim, vol_frac, chemical_potential),
       species(species),
       n_segments_per_molecule(n_segments_per_molecule) {
   name = std::string("homopolyer_") + Component::species_int_to_char(species);
@@ -16,15 +17,28 @@ Homopolymer::Homopolymer(Sim *sim, double vol_frac, int n_segments_per_molecule,
   species_list.push_back(species);
   rho_center_list = std::vector<ArrayXd>(species + 1, ArrayXd::Zero(0));
 
-  n_molecules =
-      int(sim->rho_0 * sim->V * vol_frac / n_segments_per_molecule + 0.5);
+  double n_molecules_continuous =
+      sim->rho_0 * sim->V * vol_frac / n_segments_per_molecule;
+  if (fractional_component) {
+    // Use ceiling function to calculate # of molecules becuase the last one
+    // will be a fractional molecule, so we can hit exactly the right number
+    n_molecules = int(std::ceil(n_molecules_continuous));
+    last_molecule_fractional_presence =
+        1 - (n_molecules - n_molecules_continuous);
+  } else {
+    // Round to the nearest integer because we can't hit exactly the right
+    // number of molecules without fractional molecules
+    n_molecules = int(n_molecules_continuous + 0.5);
+    last_molecule_fractional_presence = 1.0;
+  }
   n_sites = n_molecules * n_segments_per_molecule;
+  molecule_mass = n_segments_per_molecule;
   site_types = ArrayXi::Constant(n_sites, species);
-  molecule_ids = ArrayXi::Zero(n_sites);
+  site_molecule_ids = ArrayXi::Zero(n_sites);
   site_coords = ArrayXXd::Zero(n_sites, sim->dim);
   for (int i_mol = 0; i_mol < n_molecules; i_mol++) {
     int i_site_start = i_mol * n_segments_per_molecule;
-    molecule_ids.segment(i_site_start, n_segments_per_molecule) = i_mol;
+    site_molecule_ids.segment(i_site_start, n_segments_per_molecule) = i_mol;
     for (int d = 0; d < sim->dim; d++) {
       site_coords(i_site_start, d) = sim->Lx[d] * sim->uniform_rand();
     }
@@ -95,4 +109,26 @@ double Homopolymer::calculate_bond_forces_and_energy() {
 int Homopolymer::get_mol_id(int site_id) {
   assert(n_segments_per_molecule > 0);
   return site_id / n_segments_per_molecule;
+}
+
+int Homopolymer::get_mol_first_site_id(int molecule_id) {
+  assert(n_segments_per_molecule > 0);
+  assert(molecule_id >= 0 && molecule_id < n_molecules);
+  return molecule_id * n_segments_per_molecule;
+}
+
+void Homopolymer::set_molecule_coords(int molecule_id) {
+  int first_site = get_mol_first_site_id(molecule_id);
+  for (int d = 0; d < sim->dim; d++) {
+    site_coords(first_site, d) = sim->Lx[d] * sim->uniform_rand();
+  }
+  for (int i_seg = 1; i_seg < n_segments_per_molecule; i_seg++) {
+    int cur_site = first_site + i_seg;
+    int prev_site = cur_site - 1;
+    for (int d = 0; d < sim->dim; d++) {
+      site_coords(cur_site, d) =
+          site_coords(prev_site, d) + sim->bond_length * sim->gaussian_rand();
+    }
+    utils::enforce_pbc(site_coords, sim->Lx, cur_site);
+  }
 }

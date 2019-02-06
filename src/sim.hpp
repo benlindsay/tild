@@ -42,7 +42,7 @@ using Eigen::ArrayXXi;   // Dynamically sized 2D int Array
 
 class Sim {
  public:
-  Sim(YAML::Node input);
+  virtual void init(YAML::Node input);
   virtual ~Sim();
   virtual void init_default_summary_options_list() = 0;
   virtual void init_output_list(YAML::Node input) = 0;
@@ -50,10 +50,11 @@ class Sim {
   virtual void calculate_forces();
   virtual void move_particles();
   virtual void run();
+  void recalculate_rho_0();
   int get_global_index(int ix_global, int iy_global);
   int get_global_index(int ix_global, int iy_global, int iz_global);
   ArrayXd pbc_r2_minus_r1(ArrayXd r1, ArrayXd r2);
-  void init_component_list(YAML::Node input);
+  virtual void init_component_list(YAML::Node input);
   void load_restart_file(fs::path restart_file_path);
   void init_potentials();
   void write_outputs();
@@ -123,6 +124,8 @@ class Sim {
   std::vector<std::string> default_summary_options_list;
 
   std::vector<double> diffusion_coeff_list;
+
+  bool do_fractional_molecules;
 
   // FFTW variables
   fftw_plan forward_plan;

@@ -1,0 +1,47 @@
+dim: 2
+
+Lx: [10.25, 10.25]
+Nx: [41, 41]
+rho_0: 10.0
+bond_length: 1.0
+monomer_size: 0.5
+timestep: 0.001
+sim_plan: single_sim
+sim_type: semi_grand
+output_dir: output
+max_iter: 2000
+mesh_order: 2
+kappa: 50.0
+chi:
+  AB: 5.0
+# restart_file: input/trajectory.lammpstrj
+# random_seed: 1544286846034
+partial_step_rate: 0.0
+
+components:
+  - type: homopolymer
+    species: A
+    vol_frac: 0.5
+    n_segments_per_molecule: 5
+  - type: homopolymer
+    species: B
+    vol_frac: 0.5
+    n_segments_per_molecule: 5
+
+diffusion_coeffs:
+  A: 1.0
+  B: 1.0
+
+outputs:
+  grid:
+    print_freq: 50
+    column_width: 15
+    write_header: false
+    pm3d_compatible: true
+  lammpstrj:
+    print_freq: 50
+  summary:
+    options_list: ["iter", "bond_energy", "nonbond_energy", "component_vol_fracs"]
+    print_freq: 50
+    column_width: 15
+    write_header: true

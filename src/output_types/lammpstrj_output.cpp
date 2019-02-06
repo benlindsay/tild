@@ -69,7 +69,7 @@ void Lammpstrj_Output::write() {
       for (int i_site = 0; i_site < comp->n_sites; i_site++) {
         file << i_site + site_id_shift << " ";
         file << comp->site_types[i_site] << " ";
-        file << comp->molecule_ids[i_site] + mol_id_shift << " ";
+        file << comp->site_molecule_ids[i_site] + mol_id_shift << " ";
         file << comp->site_coords.row(i_site) << "\n";
       }
       site_id_shift += comp->n_sites;

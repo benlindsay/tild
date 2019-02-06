@@ -6,11 +6,13 @@
 #include "component_types/homopolymer.hpp"
 
 Component* Component_Factory::New_Component(Sim* sim, YAML::Node input,
-                                            YAML::Node component_params) {
+                                            YAML::Node component_params,
+                                            bool fractional_component) {
   std::string component_type = component_params["type"].as<std::string>();
   if (component_type == "homopolymer") {
     int species = -1;
     double vol_frac = -1;
+    double chemical_potential = 0.0;
     int n_segments_per_molecule = -1;
     for (YAML::const_iterator it = component_params.begin();
          it != component_params.end(); ++it) {
@@ -23,6 +25,8 @@ Component* Component_Factory::New_Component(Sim* sim, YAML::Node input,
         species = Component::species_char_to_int(species_char);
       } else if (key == "vol_frac") {
         vol_frac = value.as<double>();
+      } else if (key == "chemical_potential") {
+        chemical_potential = value.as<double>();
       } else if (key == "n_segments_per_molecule") {
         n_segments_per_molecule = value.as<int>();
       } else {
@@ -37,7 +41,9 @@ Component* Component_Factory::New_Component(Sim* sim, YAML::Node input,
       utils::die("n_segments_per_molecule for " + component_type +
                  " is undefined");
     }
-    return new Homopolymer(sim, vol_frac, n_segments_per_molecule, species);
+    return new Homopolymer(sim, vol_frac, chemical_potential,
+                           n_segments_per_molecule, species,
+                           fractional_component);
   } else {
     utils::die("Can't recognize component type '" + component_type + "'!");
     return NULL;

@@ -12,7 +12,8 @@
 class Component_Factory {
  public:
   static Component *New_Component(Sim *sim, YAML::Node input,
-                                  YAML::Node component_params);
+                                  YAML::Node component_params,
+                                  bool fractional_component);
 };
 
 #endif  // COMPONENT_FACTORY_HPP

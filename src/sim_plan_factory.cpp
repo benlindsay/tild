@@ -38,20 +38,23 @@ Sim_Plan* Sim_Plan_Factory::New_Sim_Plan(YAML::Node input) {
 Sim_Plan* Sim_Plan_Factory::New_Sim_Plan(fs::path input_file_path) {
   // Turn the input_file_path into an absolute path with no ..'s
   input_file_path = fs::canonical(fs::absolute(input_file_path));
-  // Get the directory of the input file
-  fs::path input_file_dir = input_file_path.parent_path();
   // Read input file and store data in YAML Node
   YAML::Node input = YAML::LoadFile(input_file_path.string());
   // Convert all input data to lowercase
   utils::to_lower(input);
   // Whether or not "input_dir" was provided in the yaml input file, add a
   // variable for input directory to the yaml data
-  input["input_dir"] = input_file_dir.string();
+  fs::path current_dir = fs::current_path();
+  if (!input["input_dir"]) {
+    // If "input_dir" is not provided in input file, use current_dir as the
+    // output_dir
+    input["input_dir"] = current_dir.string();
+  }
 
   if (!input["output_dir"]) {
-    // If "output_dir" is not provided in input file, use the input_dir as the
-    // output_dir as well
-    input["output_dir"] = input_file_dir.string();
+    // If "output_dir" is not provided in input file, use current_dir as the
+    // output_dir
+    input["output_dir"] = current_dir.string();
   }
 
   return New_Sim_Plan(input);

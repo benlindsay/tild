@@ -10,7 +10,7 @@
 
 class Canonical_Sim : public Sim {
  public:
-  Canonical_Sim(YAML::Node input);
+  virtual void init(YAML::Node input);
   virtual ~Canonical_Sim(){};
   virtual void init_default_summary_options_list();
   virtual void init_output_list(YAML::Node input);

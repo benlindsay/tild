@@ -97,12 +97,82 @@ void Component::add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
     total_weight /= sim->grid_point_volume;
     // Actually add site to grid
     int species = site_types[i_site];
+    // Reduce weight for fractional molecule. This is for Continuous Fractional
+    // Components. If not doing CFC, last_molecule_fractional_presence should be
+    // 1, and this won't affect anything.
+    if (site_molecule_ids[i_site] == n_molecules - 1) {
+      total_weight *= last_molecule_fractional_presence;
+    }
     rho_center_list[species][global_index] += total_weight;
 
     site_grid_indices(i_site, i) = global_index;
     site_grid_weights(i_site, i) = total_weight;
   }
   delete[] xyz_shifts_ptr;
+}
+
+void Component::add_or_remove_molecule(int delta_molecules) {
+  // Note that volume fraction is modified at the end of
+  // add_to_fractional_presence
+  if (std::abs(delta_molecules) != 1) {
+    utils::die("Only -1 or 1 can be passed to add_or_remove_molecules");
+  }
+  int n_sites_per_molecule = n_sites / n_molecules;
+  n_molecules += delta_molecules;
+  n_sites = n_molecules * n_sites_per_molecule;
+  // Adjust # rows, leave # columns, last molecule has garbage values that we'll
+  // fill in shortly
+  site_types.conservativeResize(n_sites);
+  site_molecule_ids.conservativeResize(n_sites);
+  site_coords.conservativeResize(n_sites, NoChange);
+  // Adjust # rows, leave # columns. Use conservativeResizeLike to force zeros
+  // in the last molecule, mostly for the forces. site_grid_indices and
+  // site_grid_weights will be filled in next iteration, but might as well force
+  // the new molecule to zeros for cleanliness until then
+  site_forces.conservativeResizeLike(
+      ArrayXXd::Zero(n_sites, site_forces.cols()));
+  site_grid_indices.conservativeResizeLike(
+      ArrayXXiR::Zero(n_sites, site_grid_indices.cols()));
+  site_grid_weights.conservativeResizeLike(
+      ArrayXXdR::Zero(n_sites, site_grid_weights.cols()));
+  if (delta_molecules == 1) {
+    int last_molecule_start = (n_molecules - 1) * n_sites_per_molecule;
+    // Copy site_types to last molecule
+    site_types.segment(last_molecule_start, n_sites_per_molecule) =
+        site_types.segment(0, n_sites_per_molecule);
+    // Add site_molecule_ids to last molecule
+    int molecule_id = n_molecules - 1;
+    site_molecule_ids.segment(last_molecule_start, n_sites_per_molecule) =
+        molecule_id;
+    // Random site_coords for last molecule
+    set_molecule_coords(molecule_id);
+  }
+}
+
+void Component::add_to_fractional_presence(double delta_lambda) {
+  last_molecule_fractional_presence += delta_lambda;
+  if (last_molecule_fractional_presence <= 0.0) {
+    if (n_molecules > 1) {
+      // Only remove a molecule if there's still a full molecule left to haunt
+      remove_last_molecule();
+      last_molecule_fractional_presence += 1.0;
+    } else {
+      // If we're already on the last one, hold at 0
+      last_molecule_fractional_presence = 0.0;
+    }
+  } else {
+    double n_molecules_continuous =
+        n_molecules - 1 + last_molecule_fractional_presence;
+    if (n_molecules_continuous > max_n_molecules) {
+      // restrict number of continuous molecules to the precomputed max. Note
+      // that last_molecule_fractional_presence could still be > 1 after this
+      last_molecule_fractional_presence = max_n_molecules + 1 - n_molecules;
+    }
+    if (last_molecule_fractional_presence > 1.0) {
+      last_molecule_fractional_presence -= 1.0;
+      add_new_molecule();
+    }
+  }
 }
 
 void Component::calculate_grid_densities() {

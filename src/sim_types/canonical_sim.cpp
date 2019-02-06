@@ -4,8 +4,10 @@
 
 #include "canonical_sim.hpp"
 
-Canonical_Sim::Canonical_Sim(YAML::Node input) : Sim(input) {
-  utils::print_one_line("Initializing Canonical_Sim");
+void Canonical_Sim::init(YAML::Node input) {
+  Sim::init(input);
+  description = "Canonical_Sim";
+  utils::print_one_line("Initializing " + description);
   init_default_summary_options_list();
   init_output_list(input);
 }
