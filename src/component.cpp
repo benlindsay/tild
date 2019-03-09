@@ -60,7 +60,7 @@ void Component::calculate_axes_grid_weights(int i_site,
 
 void Component::add_site_to_grid(int i_site, ArrayXi &subgrid_center_indices,
                                  ArrayXXdR &axes_grid_weights) {
-  int left_shift = sim->mesh_order / 2 + sim->mesh_order % 2;
+  int left_shift = sim->mesh_order / 2;
   ArrayXXi subgrid_indices = sim->weight_subgrid_index_shifts.rowwise() +
                              subgrid_center_indices.transpose() - left_shift;
   int *subgrid_indices_ptr = subgrid_indices.data();
