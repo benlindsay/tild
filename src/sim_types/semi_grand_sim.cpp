@@ -116,6 +116,9 @@ double Semi_Grand_Sim::calculate_dU_chi_kappa_dlambda_1_m_1(Component *comp_1,
         int species_1 = std::min(species_i, species_j);
         int species_2 = std::max(species_i, species_j);
         double chi_plus_kappa = chi(species_1, species_2) + kappa;
+        if (chi_plus_kappa == 0.0) {
+          continue;
+        }
         ArrayXd &u_conv_species_density =
             u_conv_species_density_arrays[species_1][species_2];
         if (u_conv_species_density.size() == 0) {
