@@ -119,8 +119,10 @@ double Semi_Grand_Sim::calculate_dU_chi_kappa_dlambda_1_m_1(Component *comp_1,
         if (chi_plus_kappa == 0.0) {
           continue;
         }
+        // u_conv_species_density_arrays[species_i][species_j] represents u_ij
+        // convolved with species density i
         ArrayXd &u_conv_species_density =
-            u_conv_species_density_arrays[species_1][species_2];
+            u_conv_species_density_arrays[species_i][species_j];
         if (u_conv_species_density.size() == 0) {
           u_conv_species_density = ArrayXd::Zero(ML);
           convolve(species_density_list[species_i],
