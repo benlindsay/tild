@@ -170,6 +170,8 @@ void Semi_Grand_Sim::update_fractional_presence() {
                                comp_2->last_molecule_fractional_presence) /
                       comp_2->molecule_mass;
   dH_dlambda_1_m_1 += log_term_1 - log_term_2;
+  double random_prefactor = std::sqrt(2 * partial_step_rate * timestep);
+  double noise = gaussian_rand() * random_prefactor;
   double dlambda_1_m_1_dt = -partial_step_rate * dH_dlambda_1_m_1 + noise;
   double delta_lambda_1 = dlambda_1_m_1_dt * timestep / comp_1->molecule_mass;
   double delta_lambda_2 = -dlambda_1_m_1_dt * timestep / comp_2->molecule_mass;
