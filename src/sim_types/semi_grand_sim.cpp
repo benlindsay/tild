@@ -125,9 +125,10 @@ double Semi_Grand_Sim::calculate_dU_chi_kappa_dlambda_1_m_1(Component *comp_1,
             u_conv_species_density_arrays[species_i][species_j];
         if (u_conv_species_density.size() == 0) {
           u_conv_species_density = ArrayXd::Zero(ML);
+          bool volume_included = true;
           convolve(species_density_list[species_i],
                    pair_potential_arrays[species_1][species_2],
-                   u_conv_species_density);
+                   u_conv_species_density, volume_included);
         }
         ArrayXi site_j_grid_indices = comp->site_grid_indices.row(site_j);
         ArrayXd site_j_grid_weights = comp->site_grid_weights.row(site_j);
