@@ -63,6 +63,8 @@ class Sim {
   void fftw_fwd(ArrayXd &in_array, ArrayXcd &out_array);
   void fftw_back(ArrayXcd &in_array, ArrayXd &out_array);
   void fftw_back(std::complex<double> *in_array_ptr, double *out_array_ptr);
+  void convolve(ArrayXd &array_1, ArrayXd &array_2, ArrayXd &convolved,
+                bool volume_included);
   void convolve(ArrayXd &array_1, ArrayXd &array_2, ArrayXd &convolved);
   void calculate_gradients(ArrayXd &array, ArrayXXd &grad_arrays);
   void calculate_gradients(ArrayXd &array, ArrayXXcd &grad_hat_arrays,

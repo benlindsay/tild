@@ -624,14 +624,24 @@ void Sim::fftw_back(std::complex<double> *in_array_ptr, double *out_array_ptr) {
   }
 }
 
-void Sim::convolve(ArrayXd &array_1, ArrayXd &array_2, ArrayXd &convolved) {
+void Sim::convolve(ArrayXd &array_1, ArrayXd &array_2, ArrayXd &convolved,
+                   bool volume_included) {
   ArrayXcd array_1_hat(ML);
   ArrayXcd array_2_hat(ML);
   ArrayXcd convolved_hat(ML);
   fftw_fwd(array_1, array_1_hat);
   fftw_fwd(array_2, array_2_hat);
-  convolved_hat = array_1_hat * array_2_hat * V;
+  if (volume_included == true) {
+    convolved_hat = array_1_hat * array_2_hat;
+  } else {
+    convolved_hat = array_1_hat * array_2_hat * V;
+  }
   fftw_back(convolved_hat, convolved);
+}
+
+void Sim::convolve(ArrayXd &array_1, ArrayXd &array_2, ArrayXd &convolved) {
+  bool volume_included = false;
+  convolve(array_1, array_2, convolved, volume_included);
 }
 
 void Sim::calculate_gradients(ArrayXd &array, ArrayXXd &grad_arrays) {
