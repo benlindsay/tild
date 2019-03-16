@@ -96,6 +96,9 @@ class Component {
 
   double chemical_potential;
   double last_molecule_fractional_presence;
+  double min_n_molecules;  // Minimum value of n_full_molecules +
+                           // n_partial_molecules (i.e. n_molecules - 1 +
+                           // last_molecule_fractional_presence)
   double max_n_molecules;  // Maximum value of n_full_molecules +
                            // n_partial_molecules (i.e. n_molecules - 1 +
                            // last_molecule_fractional_presence)

@@ -85,8 +85,14 @@ void Semi_Grand_Sim::init_component_list(YAML::Node input) {
   Component *comp_2 = component_list[1];
   double total_swappable_mass =
       (comp_1->vol_frac + comp_2->vol_frac) * rho_0 * V;
-  comp_1->max_n_molecules = total_swappable_mass / comp_1->molecule_mass;
-  comp_2->max_n_molecules = total_swappable_mass / comp_2->molecule_mass;
+  comp_1->min_n_molecules =
+      EPSILON * total_swappable_mass / comp_1->molecule_mass;
+  comp_2->min_n_molecules =
+      EPSILON * total_swappable_mass / comp_2->molecule_mass;
+  comp_1->max_n_molecules =
+      (1.0 - EPSILON) * total_swappable_mass / comp_1->molecule_mass;
+  comp_2->max_n_molecules =
+      (1.0 - EPSILON) * total_swappable_mass / comp_2->molecule_mass;
 }
 
 double Semi_Grand_Sim::calculate_dU_chi_kappa_dlambda_1_m_1(Component *comp_1,
@@ -175,14 +181,14 @@ void Semi_Grand_Sim::update_fractional_presence() {
   double dlambda_1_m_1_dt = -partial_step_rate * dH_dlambda_1_m_1 + noise;
   double delta_lambda_1 = dlambda_1_m_1_dt * timestep / comp_1->molecule_mass;
   double delta_lambda_2 = -dlambda_1_m_1_dt * timestep / comp_2->molecule_mass;
-  if (std::abs(delta_lambda_1) > 1.0 || std::abs(delta_lambda_2) > 1.0) {
-    std::stringstream ss;
-    ss << "delta_lambda_1 = " << delta_lambda_1
-       << " and delta_lambda_2 = " << delta_lambda_2
-       << ". Their magnitudes should be < 1.0. Try reducing "
-          "partial_step_rate or timestep.";
-    utils::die(ss);
-  }
+  // if (std::abs(delta_lambda_1) > 1.0 || std::abs(delta_lambda_2) > 1.0) {
+  //   std::stringstream ss;
+  //   ss << "delta_lambda_1 = " << delta_lambda_1
+  //      << " and delta_lambda_2 = " << delta_lambda_2
+  //      << ". Their magnitudes should be < 1.0. Try reducing "
+  //         "partial_step_rate or timestep.";
+  //   utils::die(ss);
+  // }
   comp_1->add_to_fractional_presence(delta_lambda_1);
   comp_2->add_to_fractional_presence(delta_lambda_2);
 

@@ -150,29 +150,30 @@ void Component::add_or_remove_molecule(int delta_molecules) {
 }
 
 void Component::add_to_fractional_presence(double delta_lambda) {
-  last_molecule_fractional_presence += delta_lambda;
-  if (last_molecule_fractional_presence <= 0.0) {
-    if (n_molecules > 1) {
-      // Only remove a molecule if there's still a full molecule left to haunt
-      remove_last_molecule();
-      last_molecule_fractional_presence += 1.0;
-    } else {
-      // If we're already on the last one, hold at 0
-      last_molecule_fractional_presence = 0.0;
-    }
-  } else {
-    double n_molecules_continuous =
-        n_molecules - 1 + last_molecule_fractional_presence;
-    if (n_molecules_continuous > max_n_molecules) {
-      // restrict number of continuous molecules to the precomputed max. Note
-      // that last_molecule_fractional_presence could still be > 1 after this
-      last_molecule_fractional_presence = max_n_molecules + 1 - n_molecules;
-    }
-    if (last_molecule_fractional_presence > 1.0) {
-      last_molecule_fractional_presence -= 1.0;
-      add_new_molecule();
-    }
+  // restrict magnitude of delta_lambda to 1 so we add or subtract no more
+  // than 1 molecule at a time
+  if (delta_lambda < -1.0) {
+    delta_lambda = -1.0;
+  } else if (delta_lambda > 1.0) {
+    delta_lambda = 1.0;
   }
+  double new_n_molecules_continuous =
+      n_molecules - 1 + last_molecule_fractional_presence + delta_lambda;
+  // Restrict number of molecules to a minimum of some nonzero small number
+  new_n_molecules_continuous =
+      std::max(new_n_molecules_continuous, min_n_molecules);
+  // Restrict number of molecules to the precomputed maximum minus some nonzero
+  // small number
+  new_n_molecules_continuous =
+      std::min(new_n_molecules_continuous, max_n_molecules);
+  int new_n_molecules = int(ceil(new_n_molecules_continuous));
+  if (new_n_molecules < n_molecules) {
+    remove_last_molecule();
+  } else if (new_n_molecules > n_molecules) {
+    add_new_molecule();
+  }
+  last_molecule_fractional_presence =
+      new_n_molecules_continuous - std::floor(new_n_molecules_continuous);
 }
 
 void Component::calculate_grid_densities() {
