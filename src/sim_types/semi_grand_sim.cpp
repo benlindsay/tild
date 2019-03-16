@@ -135,8 +135,8 @@ double Semi_Grand_Sim::calculate_dU_chi_kappa_dlambda_1_m_1(Component *comp_1,
         for (int i_grid = 0; i_grid < site_j_grid_indices.size(); i_grid++) {
           int grid_index = site_j_grid_indices[i_grid];
           // When weights were calculated in Component::add_site_to_grid(),
-          // fractional presence (lambda) was embedded. Taking the derivative with
-          // respect to lambda removes lambda from the weight.
+          // fractional presence (lambda) was embedded. Taking the derivative
+          // with respect to lambda removes lambda from the weight.
           double weight_without_lambda =
               site_j_grid_weights[i_grid] /
               comp->last_molecule_fractional_presence;
