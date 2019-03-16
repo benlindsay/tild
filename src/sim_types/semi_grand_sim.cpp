@@ -188,6 +188,10 @@ void Semi_Grand_Sim::update_fractional_presence() {
 
   double prev_rho_0 = rho_0;
   recalculate_component_vol_fracs();
+  if (!(std::abs(rho_0 - prev_rho_0) < EPSILON)) {
+    std::cout << "rho_0 = " << rho_0 << std::endl;
+    std::cout << "prev_rho_0 = " << prev_rho_0 << std::endl;
+  }
   assert(std::abs(rho_0 - prev_rho_0) < EPSILON);
 }
 
