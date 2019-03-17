@@ -150,12 +150,12 @@ void Component::add_or_remove_molecule(int delta_molecules) {
 }
 
 void Component::add_to_fractional_presence(double delta_lambda) {
-  // restrict magnitude of delta_lambda to 1 so we add or subtract no more
-  // than 1 molecule at a time
-  if (delta_lambda < -1.0) {
-    delta_lambda = -1.0;
-  } else if (delta_lambda > 1.0) {
-    delta_lambda = 1.0;
+  if (std::abs(delta_lambda) > 1.0) {
+    std::stringstream ss;
+    ss << "delta_lambda = " << delta_lambda
+       << ". Its magnitude should be <= 1.0. Try reducing "
+          "partial_step_rate or timestep.";
+    utils::die(ss);
   }
   double new_n_molecules_continuous =
       n_molecules - 1 + last_molecule_fractional_presence + delta_lambda;

@@ -181,14 +181,22 @@ void Semi_Grand_Sim::update_fractional_presence() {
   double dlambda_1_m_1_dt = -partial_step_rate * dH_dlambda_1_m_1 + noise;
   double delta_lambda_1 = dlambda_1_m_1_dt * timestep / comp_1->molecule_mass;
   double delta_lambda_2 = -dlambda_1_m_1_dt * timestep / comp_2->molecule_mass;
-  // if (std::abs(delta_lambda_1) > 1.0 || std::abs(delta_lambda_2) > 1.0) {
-  //   std::stringstream ss;
-  //   ss << "delta_lambda_1 = " << delta_lambda_1
-  //      << " and delta_lambda_2 = " << delta_lambda_2
-  //      << ". Their magnitudes should be < 1.0. Try reducing "
-  //         "partial_step_rate or timestep.";
-  //   utils::die(ss);
-  // }
+  if (std::abs(delta_lambda_1) > 1.0 || std::abs(delta_lambda_2) > 1.0) {
+    double max_abs =
+        std::max(std::abs(delta_lambda_1), std::abs(delta_lambda_2));
+    std::stringstream ss_1;
+    ss_1 << "delta_lambda_1 = " << delta_lambda_1
+         << " and delta_lambda_2 = " << delta_lambda_2
+         << ". Their magnitudes should be < 1.0. Try reducing "
+            "partial_step_rate or timestep.";
+    utils::print_one_line(ss_1);
+    delta_lambda_1 /= max_abs;
+    delta_lambda_2 /= max_abs;
+    std::stringstream ss_2;
+    ss_2 << "Reducing to " << delta_lambda_1 << " and " << delta_lambda_2
+         << " for now.";
+    utils::print_one_line(ss_2);
+  }
   comp_1->add_to_fractional_presence(delta_lambda_1);
   comp_2->add_to_fractional_presence(delta_lambda_2);
 
